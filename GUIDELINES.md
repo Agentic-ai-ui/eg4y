@@ -10,7 +10,7 @@
 | **Not the purpose** | Cloning Apple devices, Apple apps, Apple logos, or Apple branding. See [§18 Brand and legal boundaries](#18-brand-and-legal-boundaries). |
 | **Primary sources** | [Apple Human Interface Guidelines (HIG)](https://developer.apple.com/design/human-interface-guidelines) · [Apple Developer Documentation](https://developer.apple.com/documentation) |
 | **Verified against** | HIG content current through **September 2026** (Liquid Glass, iOS 27 era, iPhone Duo). |
-| **Consumed by** | `rules/` (enforceable rules with IDs) · `skills/apple-design-language/` (skill + references) · `AGENTS.md` / `CLAUDE.md` · `hooks/` |
+| **Consumed by** | [`rules/`](rules/README.md) (enforceable rules with IDs) · `skills/apple-design-language/` (skill + references) · `AGENTS.md` / `CLAUDE.md` · `hooks/` |
 
 ---
 
@@ -104,7 +104,7 @@ Apple’s design principles (reintroduced June 2026) are tools for weighing trad
 
 “Design sync” means one app, one identity, one information architecture — expressed in the idiom of each platform. Apple’s guidance is explicit: **keep functionality the same as the available space changes, keep the layout recognizable and familiar to the platform, and give each platform you support the same level of care.**
 
-### 2.1 What stays the same everywhere (MUST)
+### 2.1 What stays the same everywhere
 
 | Keep identical across platforms | Why | Source |
 |---|---|---|
@@ -198,7 +198,7 @@ Apple platforms have two material families:
 ### 4.1 Liquid Glass rules
 
 - **MUST NOT** use Liquid Glass in the content layer. *Exception:* transient interactive elements such as slider and toggle knobs take on Liquid Glass while being manipulated.
-- **MUST** prefer standard components — they adopt Liquid Glass automatically. Apply custom glass effects **sparingly**, only to the most important functional elements.
+- **SHOULD** prefer standard components — they adopt Liquid Glass automatically. Apply custom glass effects **sparingly**, only to the most important functional elements.
 - **MUST NOT** stack Liquid Glass elements on top of each other or overcrowd them; prefer standard spacing metrics.
 - **SHOULD** remove custom backgrounds from bars, split views, sheets, and popovers so the system can render glass and scroll edge effects.
 - **Variants:**
@@ -508,8 +508,8 @@ Prefer 2D text; keep it legible when scaled; maximize contrast (white text by de
 - **SHOULD** embrace simplicity; overlapping filled shapes; illustrations over photos; no replicated UI or screenshots; avoid very thin lines.
 - **SHOULD** include text only when essential; never “Watch”, “Play”, “New”, or “For visionOS”.
 - **MUST NOT** use replicas of Apple hardware.
-- **MUST NOT** bake in highlights, shadows, bevels, blurs, or glows — the system applies dynamic effects.
-- **MUST** keep a visually consistent icon across platforms and across appearances (**default, dark, clear light/dark, tinted light/dark** on iOS, iPadOS, macOS). Base the dark icon on the light one.
+- **SHOULD NOT** bake in highlights, shadows, bevels, blurs, or glows — the system applies dynamic effects. If you add custom effects, use them intentionally and test them in Icon Composer and on device.
+- **SHOULD** keep the icon visually consistent across platforms, and **MUST** keep its core features consistent across appearances (**default, dark, clear light/dark, tinted light/dark** on iOS, iPadOS, macOS). Base the dark icon on the light one.
 - **watchOS:** avoid a black background. **visionOS:** avoid “hole” shapes in the background. **tvOS:** keep a safe zone.
 - Alternate icons (iOS, iPadOS, tvOS, visionOS-compatible) need their own dark, clear, and tinted variants and are subject to App Review.
 
@@ -643,33 +643,33 @@ Keep UI in the field of view (prefer horizontal layouts), reduce the speed and i
 ### 12.1 Voice and tone
 
 - **SHOULD** define the app’s voice and a glossary of terms; vary tone by context (serious for errors, celebratory for achievements).
-- **MUST** be clear: fewer, plain words; no jargon or undefined technical terms; no colloquialisms; consider humor carefully.
+- **SHOULD** be clear: fewer, plain words; no jargon or undefined technical terms; no colloquialisms; consider humor carefully.
 - **SHOULD** address people as *you*; avoid *the user*; avoid *we* (unclear who “we” is — “Unable to load content” beats “We’re having trouble…”).
 - **SHOULD** use possessives (*my*, *your*) sparingly and consistently.
-- **MUST** avoid unnecessary gender references; use gender-neutral figures; offer inclusive options (nonbinary, self-identify, decline to state) if gender is required.
+- **SHOULD** avoid unnecessary gender references; use gender-neutral figures; offer inclusive options (nonbinary, self-identify, decline to state) if gender is required.
 - **SHOULD** portray diverse people and avoid stereotypes; write about disability people-first.
 
 ### 12.2 Labels and capitalization
 
-- **MUST** label buttons with verbs (“Send”, “Add to Cart”); avoid cute labels; never “Click here” — use descriptive link text.
+- **SHOULD** label buttons with verbs (“Send”, “Add to Cart”); avoid cute labels; avoid “Click here” — use descriptive link text.
 - **MUST** use the right gesture word for the device (**tap** on touch devices, **click** with a pointer) — or device-neutral **choose** in alerts.
 - **SHOULD** choose a capitalization style per element type and apply it consistently. Apple’s own conventions:
   - **Title-style**: buttons, menu items, menu titles, segment labels, column headings, alert titles that are fragments, list/form **section headers** (no longer all caps).
   - **Sentence-style**: alert titles that are complete sentences, alert messages, purpose strings, slider labels (ending in a colon).
 - **SHOULD** use consistent multistep language: “Get Started” → “Continue”/“Next” → “Done”.
-- **MUST** append an ellipsis (…) to commands that need more input before completing (menu items, macOS push buttons that open another view).
+- **SHOULD** append an ellipsis (…) to commands that need more input before completing (menu items, macOS push buttons that open another view).
 - **SHOULD** remove articles (*a*, *an*, *the*) from menu items.
 
 ### 12.3 Errors, empty states, settings, fields
 
-- **MUST** write errors that are close to the problem, blame-free, and actionable (“Choose a password with at least 8 characters”); no “Oops!”; no robotic messages like “Invalid name”.
+- **SHOULD** write errors that are close to the problem, blame-free, and actionable (“Choose a password with at least 8 characters”); no “Oops!”; no robotic messages like “Invalid name”.
 - **SHOULD** give empty states a clear next step and a button to take it; never place crucial information there.
 - **SHOULD** label settings plainly and describe what happens when *on*; link directly to settings rather than describing their location.
 - **SHOULD** label every text field and use placeholder hints (“name@example.com”); show errors next to the field.
 
 ### 12.4 Languages and right-to-left
 
-- **MUST** internationalize and localize; let the system format dates, times, numbers, and currency.
+- **SHOULD** internationalize and localize; let the system format dates, times, numbers, and currency.
 - System components flip automatically for RTL. Additionally:
   - Align 1–2 line text to the interface direction, but align **paragraphs** (3+ lines) to their language; align all list items consistently.
   - **MUST NOT** reverse the digits within a number; reverse the order of numerals that show progress or sequence.
@@ -739,7 +739,7 @@ Keep UI in the field of view (prefer horizontal layouts), reduce the speed and i
 
 ### 13.6 Modality, sheets, alerts, action sheets, popovers
 
-**Modality** — **MUST** use only with clear benefit; keep modal tasks short and simple; avoid app-within-an-app hierarchies; always provide an obvious dismissal; confirm before discarding user content; title the task; **never show more than one modal (or more than one alert) at a time**.
+**Modality** — **SHOULD** use only with clear benefit; keep modal tasks short and simple; avoid app-within-an-app hierarchies; always provide an obvious dismissal; confirm before discarding user content; title the task; **never show more than one modal (or more than one alert) at a time**.
 
 **Sheets**
 - Buttons: **Cancel** (leading, iOS), **Done** (trailing), **Back** for multistep flows. **MUST** pair Done with Cancel or Back; **MUST NOT** show all three at once.
@@ -747,7 +747,7 @@ Keep UI in the field of view (prefer horizontal layouts), reduce the speed and i
 - **macOS:** reasonable default size; let people use other app windows; use a panel for repeated input. **visionOS:** center in view, don’t cover the whole window. **watchOS:** only for custom title/content; brief.
 
 **Alerts**
-- **MUST** use sparingly, for critical and actionable information; never merely informative; never at app launch; not for common undoable actions.
+- **SHOULD** use sparingly, for critical and actionable information; never merely informative; never at app launch; not for common undoable actions.
 - Content: title (≤ 2 lines, specific — never just “Error”), optional short message, **up to three buttons**.
 - Buttons: one- or two-word verbs; **“OK” only in purely informational alerts**; never “Yes/No”; always “Cancel” for canceling; default button on the trailing side (or top of a stack); Cancel on the leading side (or bottom).
 - Destructive style only for destructive actions people **didn’t** deliberately choose; include Cancel whenever there’s a destructive action; Cancel is never the default.
@@ -793,7 +793,7 @@ Keep UI in the field of view (prefer horizontal layouts), reduce the speed and i
 
 | Pattern | Rules |
 |---|---|
-| **Launching** | Launch instantly; restore previous state (scroll position, windows). iOS/iPadOS/tvOS launch screens **MUST** be nearly identical to the first screen, contain **no text**, **no logos/branding/ads**, and match orientation and appearance. Put any splash screen at the start of onboarding. visionOS: launch in the Shared Space. |
+| **Launching** | Launch instantly; restore previous state (scroll position, windows). iOS/iPadOS/tvOS launch screens **MUST NOT** advertise or carry logos/branding, and **SHOULD** be nearly identical to the first screen, contain **no text**, and match orientation and appearance. Put any splash screen at the start of onboarding. visionOS: launch in the Shared Space. |
 | **Onboarding** | Fast, fun, optional; teach through interaction; prefer contextual tips (TipKit); make tutorials skippable and findable later; don’t teach the OS; no licensing in onboarding; postpone setup; request permissions in context; ask for ratings/purchases only after engagement. |
 | **Loading** | Show something immediately (placeholders); let people keep working; download large assets in the background; determinate progress when duration is known. watchOS: display content immediately. |
 | **Feedback** | Make feedback accessible (color + text + sound + haptics); integrate status inline; alerts only for critical info; warn only for **unexpected, irreversible** data loss; confirm significant completions; explain why a command can’t run. |
@@ -825,19 +825,19 @@ Keep UI in the field of view (prefer horizontal layouts), reduce the speed and i
 
 - **MUST** offer more than one way to interact; respond to standard gestures as people expect; never repurpose standard gestures for app-unique actions.
 - Custom gestures **MUST** be discoverable, easy, distinct, and **never the only way** to do something; they supplement standard ones (e.g., edge swipe + Back button).
-- **MUST NOT** conflict with system gestures (iOS three-finger undo/redo and pinch copy/paste, shake to undo, iPadOS four-finger app switching; visionOS hand-roll for system overlays).
+- **SHOULD NOT** conflict with system gestures (iOS three-finger undo/redo and pinch copy/paste, shake to undo, iPadOS four-finger app switching; visionOS hand-roll for system overlays).
 - **visionOS:** prefer **indirect** gestures (look + tap) for UI; reserve direct touch for nearby objects; don’t require specific body positions or a specific hand.
 - **watchOS:** double tap scrolls lists and MAY trigger one primary action — don’t set a primary action in scrolling views.
 
 ### 15.2 Keyboards
 
-- **MUST** support Full Keyboard Access where available; **MUST NOT** repurpose standard shortcuts (⌘C, ⌘V, ⌘X, ⌘Z, ⇧⌘Z, ⌘A, ⌘F, ⌘G, ⌘N, ⌘O, ⌘P, ⌘S, ⌘W, ⌘Q, ⌘M, ⌘H, ⌘, for Settings, ⌘? for Help, ⌘. to cancel, Esc…).
+- **SHOULD** support Full Keyboard Access where available; **SHOULD NOT** repurpose standard shortcuts (⌘C, ⌘V, ⌘X, ⌘Z, ⇧⌘Z, ⌘A, ⌘F, ⌘G, ⌘N, ⌘O, ⌘P, ⌘S, ⌘W, ⌘Q, ⌘M, ⌘H, ⌘, for Settings, ⌘? for Help, ⌘. to cancel, Esc…).
 - Custom shortcuts: only for frequent commands; **Command** first; Shift secondary; Option sparingly; **avoid Control**; list modifiers in the order **Control, Option, Shift, Command**; don’t add Shift for a key’s upper character; let the system localize and mirror shortcuts.
 - iPadOS: support keyboard navigation for text fields, text views, sidebars, and collections — not for buttons, segmented controls, or switches (Full Keyboard Access handles those).
 
 ### 15.3 Focus (iPadOS, macOS, tvOS, visionOS)
 
-- **SHOULD** rely on system focus effects; **MUST NOT** move focus without interaction (except when the focused item disappears during directional navigation).
+- **SHOULD** rely on system focus effects; **SHOULD NOT** move focus without interaction (except when the focused item disappears during directional navigation).
 - Focus ring for text/search fields; highlight for list and collection rows.
 - **tvOS:** every element reachable by directional focus; no free pointer in menus; design five focus states (unfocused, focused, highlighted, selected, unavailable) and supply assets for the enlarged focused size.
 - **iPadOS:** Tab moves between focus groups; arrow keys move within a group.
@@ -846,7 +846,7 @@ Keep UI in the field of view (prefer horizontal layouts), reduce the speed and i
 
 - Gaze targets, the system shows a hover effect; apps never learn where people look before they tap.
 - **SHOULD** place reading content **≥ 1 m** away; avoid rapid eye adjustments across large areas or depths.
-- **MUST** leave space: **≥ 16 pt margin** around interactive items or centers **≥ 60 pt apart**.
+- **SHOULD** leave space: **≥ 16 pt margin** around interactive items or centers **≥ 60 pt apart**.
 - **SHOULD** use rounded shapes for interactive items; define one containing shape for multi-part components; avoid full-field repeating patterns; use custom hover effects only for special moments.
 
 **Sources:** [Gestures](https://developer.apple.com/design/human-interface-guidelines/gestures) · [Keyboards](https://developer.apple.com/design/human-interface-guidelines/keyboards) · [Focus and selection](https://developer.apple.com/design/human-interface-guidelines/focus-and-selection) · [Eyes](https://developer.apple.com/design/human-interface-guidelines/eyes)
@@ -977,39 +977,39 @@ This package teaches an agent to design *for* the Apple ecosystem — never to i
 
 ## 19. Agent review checklist
 
-Run before presenting any design or UI code. Every “no” needs a fix or a stated reason.
+Run before presenting any design or UI code. Every “no” needs a fix or a stated reason. Rule IDs point to [`rules/`](rules/README.md).
 
 **Foundation**
-- [ ] Standard components used wherever one exists?
-- [ ] Controls/navigation in the Liquid Glass layer; **no glass in the content layer**; no glass-on-glass?
-- [ ] Layout driven by size classes and safe areas (no device checks, no fixed widths)?
-- [ ] Works in light, dark, Increase Contrast, Reduce Transparency, Reduce Motion?
+- [ ] Standard components used wherever one exists? — `SYS-01`
+- [ ] Controls/navigation in the Liquid Glass layer; **no glass in the content layer**; no glass-on-glass? — `LAY-08` `GLS-01` `GLS-03`
+- [ ] Layout driven by size classes and safe areas (no device checks, no fixed widths)? — `LAY-01` `LAY-02` `LAY-03`
+- [ ] Works in light, dark, Increase Contrast, Reduce Transparency, Reduce Motion? — `COL-02` `COL-07` `GLS-06` `MOT-02`
 
 **Color & type**
-- [ ] Semantic system colors only; no hard-coded system values; color never the only signal?
-- [ ] Contrast ≥ 4.5:1 (≤ 17 pt) / ≥ 3:1 (≥ 18 pt or bold)?
-- [ ] Text styles + Dynamic Type through AX5; nothing below the platform minimum; no light weights?
+- [ ] Semantic system colors only; no hard-coded system values; color never the only signal? — `COL-01` `COL-03`
+- [ ] Contrast ≥ 4.5:1 (≤ 17 pt) / ≥ 3:1 (≥ 18 pt or bold)? — `COL-06`
+- [ ] Text styles + Dynamic Type through AX5; nothing below the platform minimum; no light weights? — `TYP-01` `TYP-02` `TYP-03` `LAY-04`
 
 **Interaction**
-- [ ] Hit targets ≥ platform default (44 pt iOS/watchOS, 28 pt macOS, 66 pt tvOS, 60 pt visionOS)?
-- [ ] ≤ 2 prominent buttons per view; one prominent toolbar action on the trailing side?
-- [ ] Tab bar for navigation only; always visible; no disabled tabs?
-- [ ] Every gesture has an on-screen alternative; no conflicts with system gestures or shortcuts?
-- [ ] One modal at a time; Done paired with Cancel/Back; destructive actions confirmed only when unexpected and irreversible?
+- [ ] Hit targets ≥ platform default (44 pt iOS/watchOS, 28 pt macOS, 66 pt tvOS, 60 pt visionOS)? — `A11Y-01`
+- [ ] ≤ 2 prominent buttons per view; one prominent toolbar action on the trailing side? — `CMP-01` `NAV-11`
+- [ ] Tab bar for navigation only; always visible; no disabled tabs? — `NAV-01` `NAV-02` `NAV-03`
+- [ ] Every gesture has an on-screen alternative; no conflicts with system gestures or shortcuts? — `A11Y-06` `INP-02` `INP-03` `INP-05`
+- [ ] One modal at a time; Done paired with Cancel/Back; destructive actions confirmed only when unexpected and irreversible? — `CMP-07` `CMP-09` `CMP-11` `PAT-04`
 
 **Content**
-- [ ] Verb-first, title-case button labels; no “Click here”, no “Yes/No”, no “we”; correct tap/click wording?
-- [ ] Every icon-only control has an accessibility label; decorative images hidden?
-- [ ] RTL handled (mirrored directional UI, un-mirrored logos/numbers)?
-- [ ] Permissions requested in context with a specific purpose string?
+- [ ] Verb-first, title-case button labels; no “Click here”, no “Yes/No”, no “we”; correct tap/click wording? — `WRT-01` `WRT-02` `WRT-03` `WRT-04` `WRT-06` `CMP-13`
+- [ ] Every icon-only control has an accessibility label; decorative images hidden? — `A11Y-03` `A11Y-04`
+- [ ] RTL handled (mirrored directional UI, un-mirrored logos/numbers)? — `L10N-02` `L10N-03`
+- [ ] Permissions requested in context with a specific purpose string? — `PRV-01` `PRV-02`
 
 **Cross-platform sync**
-- [ ] Same features, terms, color meanings, icons, and toolbar groupings on every supported platform?
-- [ ] Navigation container appropriate for each platform (tab bar, sidebar, menu bar, vertical tab bar, pages)?
-- [ ] Mac: every command in the menu bar? iPad: every menu command reachable in UI? visionOS: 60 pt spacing and glass windows? watchOS: glanceable, no spinners? tvOS: focus + safe area? iPhone Duo: resizes, vertical controls, reserved regions?
+- [ ] Same features, terms, color meanings, icons, and toolbar groupings on every supported platform? — `SYNC-01` … `SYNC-06`
+- [ ] Navigation container appropriate for each platform (tab bar, sidebar, menu bar, vertical tab bar, pages)? — `NAV-06` `SYNC-08`
+- [ ] Mac: every command in the menu bar? iPad: every menu command reachable in UI? visionOS: 60 pt spacing and glass windows? watchOS: glanceable, no spinners? tvOS: focus + safe area? iPhone Duo: resizes, vertical controls, reserved regions? — `PLT-MAC-01` `PLT-IPAD-02` `LAY-15` `GLS-11` `PLT-WATCH-01` `PLT-WATCH-02` `PLT-TV-01` `LAY-13` `PLT-DUO-01` `PLT-DUO-03` `PLT-DUO-04`
 
 **Brand & legal**
-- [ ] No Apple trademarks, hardware replicas, SF Symbols in the app icon, embedded system fonts, or fake system UI?
+- [ ] No Apple trademarks, hardware replicas, SF Symbols in the app icon, embedded system fonts, or fake system UI? — `BRD-01` `BRD-02` `BRD-03` `TYP-04` `BRD-04`
 
 ---
 
