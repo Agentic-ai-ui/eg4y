@@ -1,25 +1,35 @@
 # Apple Design Language — Release
 # Created by Edison Augustin X.
 #
-# Pushing a tag v<version> publishes the GitHub release for that version:
-#   1. the tag must match `version` in .claude-plugin/plugin.json and point at a commit on main
-#   2. the same checks as CI must pass on the tagged commit
-#   3. the release notes are that version's section of CHANGELOG.md
+# Publishes the GitHub release for the version in .claude-plugin/plugin.json, with that version's
+# CHANGELOG.md section as the notes, after the same checks as CI pass. Two ways to start it:
 #
-# To release: bump the version in plugin.json, add its CHANGELOG.md section, merge to main, then
-#   git tag -a v1.2.3 -m "v1.2.3" origin/main && git push origin v1.2.3
+#   Manual (no local git needed): Actions › Release › Run workflow, on main. The workflow creates the
+#   tag v<version> at the tip of main, then publishes. Optionally type the version to confirm it.
+#
+#   Tag push: git tag -a v1.2.3 -m "v1.2.3" origin/main && git push origin v1.2.3
+#
+# Either way, bump the version in plugin.json and add its CHANGELOG.md section first, and merge to main.
+# If the release already exists (for example, created on github.com), its title and notes are updated
+# from CHANGELOG.md instead of failing.
 
 name: Release
 
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, e.g. 1.2.3 — must equal plugin.json. Leave empty to use plugin.json."
+        required: false
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release
   cancel-in-progress: false
 
 jobs:
@@ -30,26 +40,51 @@ jobs:
     permissions:
       contents: write
     env:
-      TAG: ${{ github.ref_name }}
+      EVENT: ${{ github.event_name }}
+      REQUESTED: ${{ inputs.version }}
     steps:
       - uses: actions/checkout@v7
         with:
+          # A manual run always releases main; a tag push releases the tagged commit.
+          ref: ${{ github.event_name == 'workflow_dispatch' && 'main' || github.ref }}
           fetch-depth: 0
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
-      - name: Tag matches the plugin version and is on main
+      - name: Resolve the version and commit
         run: |
           version="$(python3 -c 'import json; print(json.load(open(".claude-plugin/plugin.json"))["version"])')"
-          if [ "$TAG" != "v$version" ]; then
-            echo "::error::Tag $TAG does not match plugin.json version $version (expected v$version)."
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            requested="${REQUESTED#v}"
+            if [ -n "$requested" ] && [ "$requested" != "$version" ]; then
+              echo "::error::You asked to release $requested, but plugin.json on main says $version. Bump plugin.json first."
+              exit 1
+            fi
+            tag="v$version"
+            sha="$(git rev-parse HEAD)"
+            existing="$(git rev-parse -q --verify "refs/tags/$tag^{commit}" || true)"
+            if [ -n "$existing" ] && [ "$existing" != "$sha" ]; then
+              echo "::error::$tag already exists at $existing, not at the tip of main ($sha). Bump the version in plugin.json and CHANGELOG.md."
+              exit 1
+            fi
+            echo "CREATE_TAG=$([ -z "$existing" ] && echo true || echo false)" >> "$GITHUB_ENV"
+          else
+            tag="$GITHUB_REF_NAME"
+            sha="$GITHUB_SHA"
+            if [ "$tag" != "v$version" ]; then
+              echo "::error::Tag $tag does not match plugin.json version $version (expected v$version)."
+              exit 1
+            fi
+            echo "CREATE_TAG=false" >> "$GITHUB_ENV"
+          fi
+          if ! git merge-base --is-ancestor "$sha" origin/main; then
+            echo "::error::$tag points at $sha, which is not on main. Release a commit on main."
             exit 1
           fi
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
-            echo "::error::Tag $TAG points at $GITHUB_SHA, which is not on main. Tag a commit on main."
-            exit 1
-          fi
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+          echo "SHA=$sha" >> "$GITHUB_ENV"
+          echo "Releasing $tag at $sha"
 
       - name: Release notes from CHANGELOG.md
         run: |
@@ -59,10 +94,10 @@ jobs:
           text = open("CHANGELOG.md", encoding="utf-8").read()
           match = re.search(rf"^## \[{re.escape(version)}\][^\n]*\n(.*?)(?=^## \[|^\[[^\]]+\]: |\Z)", text, re.S | re.M)
           if not match or not match.group(1).strip():
-              sys.exit(f"::error::CHANGELOG.md has no section for [{version}]. Add one before tagging.")
-          open("release-notes.md", "w", encoding="utf-8").write(match.group(1).strip() + "\n")
+              sys.exit(f"::error::CHANGELOG.md has no section for [{version}]. Add one before releasing.")
+          open(os.path.join(os.environ["RUNNER_TEMP"], "release-notes.md"), "w", encoding="utf-8").write(match.group(1).strip() + "\n")
           EOF
-          cat release-notes.md
+          cat "$RUNNER_TEMP/release-notes.md"
 
       - name: Rules and tokens are valid and up to date
         run: |
@@ -72,7 +107,24 @@ jobs:
       - name: Hook tests
         run: python3 -m unittest discover -s hooks/tests
 
+      - name: Create the tag (manual runs)
+        if: env.CREATE_TAG == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "$TAG" "$SHA"
+          git push origin "refs/tags/$TAG"   # pushed with GITHUB_TOKEN, so it doesn't start a second run
+
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$TAG" --verify-tag --title "Apple Design Language $TAG" --notes-file release-notes.md
+        run: |
+          title="Apple Design Language $TAG"
+          notes="$RUNNER_TEMP/release-notes.md"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; updating its title and notes from CHANGELOG.md."
+            gh release edit "$TAG" --title "$title" --notes-file "$notes"
+          else
+            gh release create "$TAG" --verify-tag --title "$title" --notes-file "$notes"
+          fi
+          echo "Published: $(gh release view "$TAG" --json url --jq .url)"
