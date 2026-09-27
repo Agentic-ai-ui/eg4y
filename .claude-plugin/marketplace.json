@@ -1,0 +1,14 @@
+{
+  "name": "eg4y",
+  "description": "Apple Design Language plugin marketplace — Created by Edison Augustin X.",
+  "owner": {
+    "name": "Edison Augustin X."
+  },
+  "plugins": [
+    {
+      "name": "apple-design-language",
+      "source": "./",
+      "description": "Unofficial, HIG-researched guidelines, rules, skill, design tokens, and UI checks for designing apps across the Apple ecosystem. Created by Edison Augustin X."
+    }
+  ]
+}
