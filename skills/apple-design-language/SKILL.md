@@ -104,5 +104,5 @@ Read only what the task needs:
 ## Keep in mind
 
 - **Apple’s documentation wins.** Values here are verified references, but Apple revises them between releases; native code must use system APIs rather than the numbers. If something looks outdated, check the linked HIG page and update `GUIDELINES.md` first, then `rules/`, then this skill.
-- **SwiftUI snippets were checked against Apple’s API declarations, not compiled here** — build with the current Xcode. The React, Next.js, HTML, Tailwind, Vue, Svelte, and React Native recipes were type-checked against their packages; the web ones were also run in Chromium with axe-core.
+- **SwiftUI snippets were checked against Apple’s API declarations, not compiled here** — build with the current Xcode. The React, Next.js, HTML, Tailwind, Vue, Svelte, and React Native recipes are real projects in `tests/web`, type-checked and built in CI, and the web ones run in Chromium with axe-core on every pull request.
 - **Design for everyone and every device.** When a trade-off is unclear, choose the option that keeps the app accessible, consistent across platforms, and familiar to people who already use Apple devices.

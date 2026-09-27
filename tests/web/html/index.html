@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="data:,">
+  <title>Library — HTML + CSS</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="components.css">
+</head>
+<body>
+<div class="adl-app">
+  <div class="adl-app__layout">
+    <!-- One navigation list: tab bar in compact widths, sidebar in regular widths (NAV-06, SYNC-01) -->
+    <nav class="adl-nav adl-glass" aria-label="Primary">
+      <ul class="adl-nav__list">
+        <li><a class="adl-nav__link" href="#home">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></svg>
+          <span>Home</span></a></li>
+        <li><a class="adl-nav__link" href="#library" aria-current="page">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4v16M10 4v16M15 5l4 15"/></svg>
+          <span>Library</span></a></li>
+        <li><a class="adl-nav__link" href="#search">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <span>Search</span></a></li>
+        <li><a class="adl-nav__link" href="#settings">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>
+          <span>Settings</span></a></li>
+      </ul>
+    </nav>
+
+    <main class="adl-app__main">
+      <header class="adl-toolbar adl-glass">
+        <div class="adl-toolbar__leading">
+          <button type="button" class="adl-icon-button" aria-label="More" title="More" popovertarget="more-menu" style="anchor-name: --more-menu">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+          </button>
+          <div id="more-menu" popover class="adl-menu adl-glass" style="position-anchor: --more-menu">
+            <button type="button" class="adl-menu__item" popovertarget="more-menu" popovertargetaction="hide">Share</button>
+            <button type="button" class="adl-menu__item adl-menu__item--destructive" data-open="delete-alert" popovertarget="more-menu" popovertargetaction="hide">Delete All</button>
+          </div>
+        </div>
+        <span class="adl-toolbar__title"></span>
+        <div class="adl-toolbar__trailing">
+          <button type="button" class="adl-icon-button" aria-label="Add Book" title="Add Book" data-open="new-book">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <h1 class="adl-large-title">Library</h1>
+
+      <div class="adl-grouped">
+        <fieldset class="adl-segmented">
+          <legend class="adl-visually-hidden">Sort by</legend>
+          <label class="adl-segmented__option"><input type="radio" name="sort" value="recent" checked>Recent</label>
+          <label class="adl-segmented__option"><input type="radio" name="sort" value="title">Title</label>
+        </fieldset>
+
+        <section class="adl-list-section">
+          <h2 class="adl-list-section__header">Collections</h2>
+          <ul class="adl-list" role="list">
+            <li><a class="adl-list__row adl-list__row--link" href="#all"><span class="adl-list__title">All Books</span><span class="adl-list__value">128</span></a></li>
+            <li><a class="adl-list__row adl-list__row--link" href="#reading"><span class="adl-list__title">Reading Now</span><span class="adl-list__value">3</span></a></li>
+          </ul>
+          <p class="adl-list-section__footer">Tap a collection to open it.</p>
+        </section>
+
+        <section class="adl-list-section">
+          <h2 class="adl-list-section__header">Options</h2>
+          <ul class="adl-list" role="list">
+            <li><label class="adl-list__row adl-switch-row"><span class="adl-list__title">iCloud Sync</span>
+              <input class="adl-switch" type="checkbox" role="switch" checked></label></li>
+          </ul>
+        </section>
+
+        <section class="adl-list-section">
+          <ul class="adl-list" role="list">
+            <li><button type="button" class="adl-list__row adl-list__row--destructive" data-open="delete-alert">Delete All</button></li>
+          </ul>
+        </section>
+
+        <button type="button" class="adl-button adl-button--prominent" data-open="new-book">Add Book</button>
+        <button type="button" class="adl-button">Sort by Title</button>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Sheet: Cancel leading, confirm trailing (CMP-09) -->
+<dialog id="new-book" class="adl-sheet" aria-labelledby="new-book-title">
+  <form method="dialog">
+    <div class="adl-sheet__header">
+      <button class="adl-button adl-button--plain" value="cancel" formnovalidate>Cancel</button>
+      <h2 id="new-book-title" class="adl-sheet__title">New Book</h2>
+      <button class="adl-button adl-button--plain" value="add" disabled>Add</button>
+    </div>
+    <div class="adl-sheet__body">
+      <div class="adl-field">
+        <label class="adl-field__label" for="book-title">Title</label>
+        <input id="book-title" class="adl-field__input" name="title" autocomplete="off" aria-describedby="book-title-hint" required>
+        <p id="book-title-hint" class="adl-field__hint">Shown on the spine.</p>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<!-- Alert: no default action here, so focus starts on the title; Esc = Cancel (CMP-13) -->
+<dialog id="delete-alert" class="adl-alert" role="alertdialog" aria-labelledby="delete-title" aria-describedby="delete-message">
+  <form method="dialog">
+    <div class="adl-alert__content">
+      <h2 id="delete-title" class="adl-alert__title" tabindex="-1" autofocus>Delete all books?</h2>
+      <p id="delete-message" class="adl-alert__message">This removes 128 books from this device.</p>
+    </div>
+    <div class="adl-alert__actions">
+      <button class="adl-button" value="cancel">Cancel</button>
+      <button class="adl-button adl-button--destructive" value="delete">Delete</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  // Open dialogs modally; <form method="dialog"> buttons and Esc close them natively.
+  document.querySelectorAll("[data-open]").forEach((button) => {
+    button.addEventListener("click", () => document.getElementById(button.dataset.open).showModal());
+  });
+  // Enable the sheet's confirm button only when the required field has a value.
+  const title = document.getElementById("book-title");
+  title.addEventListener("input", () => {
+    title.form.querySelector('[value="add"]').disabled = title.value.trim() === "";
+  });
+</script>
+</body>
+</html>

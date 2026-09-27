@@ -6,6 +6,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- **Recipe tests in CI** — the web and React Native recipes now live in `tests/web` as real projects. CI type-checks them (TypeScript strict, `vue-tsc`, `svelte-check`), builds them (esbuild, Tailwind CLI, Vite, `next build`), checks the Next.js prerendered metadata, and runs the React, HTML + CSS, Tailwind, Vue, and Svelte builds in Chromium with axe-core in 10 configurations (phone and tablet, light, dark, Increase Contrast, Reduce Motion, right-to-left, 200% and 310% text). `tests/web/sync_docs.py` copies the files into the references, and CI fails if a reference drifts from its tested source.
+
+### Fixed
+
+- **Largest text sizes** — found by the new harness at 310% text: the segmented control (a `fieldset`) overflowed the screen, and long words could scroll the page sideways. Segments now move to a second row, words wrap, and horizontal gutters and row insets stay fixed like iOS layout margins, so text gets the room (`components.css` and the Tailwind recipe).
+- Vue recipe icons use `@lucide/vue`, which replaces the deprecated `lucide-vue-next`.
+
 ### Changed
 
 - **Release workflow** — can be started from GitHub with **Actions › Release › Run workflow**: it reads the version from `plugin.json` (optionally confirmed by an input), runs the checks, creates the tag at the tip of `main`, and publishes. When a release already exists — for example, one created on github.com — the workflow updates its title and notes from `CHANGELOG.md` instead of failing.

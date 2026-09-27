@@ -38,6 +38,7 @@ On iOS, `systemColor("blue")` is `PlatformColor("systemBlue")` — the live UIKi
 
 For brand colors, give all four variants — the React Native equivalent of an asset-catalog Color Set:
 
+<!-- source: tests/web/react-native/theme/brand.ts -->
 ```ts
 import { DynamicColorIOS, Platform, type ColorValue } from "react-native";
 
@@ -70,6 +71,7 @@ React Native scales text with the system text size by default (`allowFontScaling
 
 Expo Router’s native tabs render the system tab bar (`UITabBarController` on iOS), so the floating Liquid Glass tab bar, the search tab, badges, and accessibility come from iOS. SF Symbols go in `sf`, Material Symbols in `md` for Android. SDK 54–57 import from `expo-router/unstable-native-tabs`; SDK 58 renames it to `expo-router/native-tabs`. On iPad the system shows its tab bar at the top; Expo’s documentation doesn’t describe a sidebar mode, so for a sidebar-first iPad or Mac layout, check the current docs before promising one (NAV-06).
 
+<!-- source: tests/web/react-native/app/_layout.tsx -->
 ```tsx
 import { NativeTabs } from "expo-router/unstable-native-tabs"; // "expo-router/native-tabs" from SDK 58
 
@@ -100,6 +102,7 @@ export default function RootLayout() {
 
 Each tab hosts a native stack. `headerLargeTitleEnabled` (the older `headerLargeTitle` is deprecated) gives the collapsing large title; leave the header background and blur alone so iOS draws its glass and scroll edge effect (NAV-15, GLS-04).
 
+<!-- source: tests/web/react-native/app/library/_layout.tsx -->
 ```tsx
 import { Stack } from "expo-router";
 
@@ -118,6 +121,7 @@ export default function LibraryLayout() {
 
 Rows are at least 44 pt tall, use semantic colors and Dynamic Type, and announce as links or buttons (A11Y-01, A11Y-03, CMP-19).
 
+<!-- source: tests/web/react-native/components/ListRow.tsx -->
 ```tsx
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SymbolView } from "expo-symbols";
@@ -196,6 +200,7 @@ const styles = StyleSheet.create({
 
 Native tabs, navigation bars, and alerts adopt Liquid Glass automatically on iOS 26. For a custom floating control, `GlassView` from `expo-glass-effect` renders the system effect on iOS 26 and falls back to a plain view elsewhere — use it only for controls in the functional layer, never for content, and never stack glass on glass (GLS-01, GLS-03, LAY-08).
 
+<!-- source: tests/web/react-native/components/FloatingButton.tsx -->
 ```tsx
 import { Pressable, StyleSheet, View } from "react-native";
 import { GlassView, isGlassEffectAPIAvailable } from "expo-glass-effect";
@@ -239,6 +244,7 @@ const styles = StyleSheet.create({
 | Modal focus | `accessibilityViewIsModal` / `aria-modal` on custom overlays | CMP-08 |
 | Large Content Viewer | `accessibilityShowsLargeContentViewer` on icon-only bar items | A11Y-05 |
 
+<!-- source: tests/web/react-native/components/useReduceMotion.ts -->
 ```ts
 import { useEffect, useState } from "react";
 import { AccessibilityInfo } from "react-native";
@@ -257,6 +263,7 @@ export function useReduceMotion(): boolean {
 
 ## 9. A complete screen
 
+<!-- source: tests/web/react-native/app/library/index.tsx -->
 ```tsx
 import { useState } from "react";
 import { Alert, ScrollView, StyleSheet, Switch, Text, View } from "react-native";

@@ -49,6 +49,7 @@ Colored text reaches WCAG 2.2 AA only on `bg-background` or `bg-background-group
 
 `@container` on the shell and `@3xl:` variants (48 rem of *app* width) switch the tab bar to a sidebar — the same breakpoint as `components.css`, and never a device check (LAY-01, NAV-06).
 
+<!-- source: tests/web/tailwind/src/AppShell.tsx -->
 ```tsx
 import type { ReactNode } from "react";
 
@@ -57,7 +58,7 @@ export type Section = { id: string; title: string; href: string; icon: ReactNode
 /**
  * Tab bar below 48rem of app width, sidebar above it — a container query, never the device (LAY-01, NAV-06).
  * Like the system tab bar, the compact bar caps its label, icon, and spacing in px so labels stay legible at large
- * text sizes; the sidebar scales fully.
+ * text sizes; the sidebar scales fully. `wrap-anywhere` lets a word wider than the screen wrap (LAY-04).
  */
 export function AppShell({ sections, currentId, children }: {
   sections: readonly Section[];
@@ -65,7 +66,7 @@ export function AppShell({ sections, currentId, children }: {
   children: ReactNode;
 }) {
   return (
-    <div className="@container min-h-dvh bg-background text-label">
+    <div className="@container min-h-dvh bg-background text-label wrap-anywhere">
       <div className="grid min-h-dvh grid-cols-1 @3xl:grid-cols-[16rem_minmax(0,1fr)]">
         <nav
           aria-label="Primary"
@@ -100,6 +101,7 @@ export function AppShell({ sections, currentId, children }: {
 
 ## 4. Buttons
 
+<!-- source: tests/web/tailwind/src/Button.tsx -->
 ```tsx
 import type { ButtonHTMLAttributes } from "react";
 
@@ -124,25 +126,27 @@ export function Button({ variant = "bordered", type = "button", ...rest }: Props
 
 ## 5. Lists and switches
 
+<!-- source: tests/web/tailwind/src/List.tsx -->
 ```tsx
 import { useId, type ReactNode } from "react";
 
 export function ListSection({ header, footer, children }: { header?: string; footer?: string; children: ReactNode }) {
   return (
     <section className="mb-6">
-      {header ? <h2 className="px-4 py-1.5 text-footnote font-semibold text-secondary-label">{header}</h2> : null}
+      {header ? <h2 className="px-[16px] py-1.5 text-footnote font-semibold text-secondary-label">{header}</h2> : null}
       <ul role="list" className="overflow-hidden rounded-xl bg-background-grouped-row">
         {children}
       </ul>
-      {footer ? <p className="px-4 py-1.5 text-footnote text-secondary-label">{footer}</p> : null}
+      {footer ? <p className="px-[16px] py-1.5 text-footnote text-secondary-label">{footer}</p> : null}
     </section>
   );
 }
 
+// Horizontal padding is px, like iOS layout margins: it stays put while text grows (LAY-04).
 // Inset separator between rows, starting at the text's leading edge
 const row =
-  "relative flex min-h-control w-full items-center gap-3 px-4 py-2 text-start " +
-  "[li+li>&]:before:absolute [li+li>&]:before:start-4 [li+li>&]:before:end-0 [li+li>&]:before:top-0 [li+li>&]:before:border-t [li+li>&]:before:border-separator";
+  "relative flex min-h-control w-full items-center gap-3 px-[16px] py-2 text-start " +
+  "[li+li>&]:before:absolute [li+li>&]:before:start-[16px] [li+li>&]:before:end-0 [li+li>&]:before:top-0 [li+li>&]:before:border-t [li+li>&]:before:border-separator";
 
 export function LinkRow({ href, title, value }: { href: string; title: string; value?: string }) {
   return (
@@ -195,6 +199,7 @@ export function SwitchRow({ label, checked, onChange }: { label: string; checked
 
 `open:`, `backdrop:`, and `starting:` style the native `<dialog>`; `transition-discrete` lets it animate in and out of the top layer; `motion-reduce:` keeps only the fade (MOT-02). The behavior is the React [Sheet](react-recipes.md#9-sheets) recipe.
 
+<!-- source: tests/web/tailwind/src/Sheet.tsx -->
 ```tsx
 import { useEffect, useId, useRef, type ReactNode } from "react";
 

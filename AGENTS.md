@@ -118,7 +118,7 @@ claude plugin validate . && claude plugin validate .claude-plugin/plugin.json
 - Keep claims **researched, not guessed**: every value and rule cites an Apple page (HIG or Developer Documentation); verify API names against Apple’s published declarations, web support against MDN, and framework APIs against the framework’s own docs or type declarations before adding them.
 - Update in order: `GUIDELINES.md` → `rules/*.md` → skill references → hooks. Never renumber or reuse a rule ID.
 - After editing rules or tokens, run both build scripts; commit the regenerated `rules/rules.json`, `rules/README.md` index, the token files (`assets/tokens.css`, `tokens.ts`, `tailwind.css`, `tokens.native.ts`), and `references/design-tokens.md` with the change.
-- Web and React Native recipes are real code: type-check and run them before changing a reference, and keep `components.css` shared by every web stack.
+- Web and React Native recipes live in [`tests/web/`](tests/web/README.md) as real projects: edit them there, run `python3 tests/web/sync_docs.py` to copy them into the references, and run `npm test` in `tests/web` (CI does all of this). Keep `components.css` shared by every web stack.
 - A new `Check: hook` rule needs a detector and a test in `hooks/` in the same change.
 - Bump `version` in `.claude-plugin/plugin.json` (semantic versioning) for every release — installed users stay on the manifest version until it changes. Add the version’s section to `CHANGELOG.md`; after merging, run **Actions › Release › Run workflow** on `main` (or push the tag `v<version>`) to publish the release.
 - Use ASCII hyphens in headings so anchors stay stable; keep `SKILL.md` under 500 lines and this file under 200.

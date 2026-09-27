@@ -18,6 +18,7 @@ Next.js adds three things on top of the React recipes: the document metadata (vi
 
 `viewport` and `metadata` are exported from a Server Component layout. Next.js already emits `width=device-width, initial-scale=1`; add `viewportFit: "cover"` so `env(safe-area-inset-*)` reports real insets (LAY-02), and `colorScheme: "light dark"` so form controls and scrollbars follow the appearance (COL-07). The Next.js docs show `maximumScale: 1` and `userScalable: false` for completeness — **don’t use them**; they block zoom (A11Y-05).
 
+<!-- source: tests/web/nextjs/app/layout.tsx -->
 ```tsx
 import type { Metadata, Viewport } from "next";
 import "./tokens.css";
@@ -56,6 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 The shell stays a Server Component; only the navigation needs client JavaScript, because it reads the current path. `next/link` renders an `<a>`, so the `adl-nav__link` class and `aria-current` work unchanged, and `components.css` presents the list as a tab bar or sidebar (NAV-06, SYNC-01).
 
+<!-- source: tests/web/nextjs/components/AppNav.tsx -->
 ```tsx
 "use client";
 
@@ -88,6 +90,7 @@ export function AppNav({ sections }: { sections: readonly Section[] }) {
 }
 ```
 
+<!-- source: tests/web/nextjs/app/(tabs)/layout.tsx -->
 ```tsx
 import { House, Library, Search, Settings } from "lucide-react";
 import { AppNav, type Section } from "../../components/AppNav";
