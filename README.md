@@ -222,7 +222,8 @@ Apple updates the HIG throughout the year; each HIG page has a change log.
 2. Update the affected **`rules/`** — never renumber or reuse a rule ID — and run `build_rules.py`.
 3. Update **skill references** and `assets/tokens.json`, then run `build_tokens.py`.
 4. If a rule is `Check: hook`, update its detector and tests in **`hooks/`**.
-5. Bump `version` in **`.claude-plugin/plugin.json`** so installed users receive the update.
+5. Bump `version` in **`.claude-plugin/plugin.json`** so installed users receive the update, and add that version’s section to **[`CHANGELOG.md`](CHANGELOG.md)**.
+6. After the change merges, push the tag `v<version>` on `main`; the [release workflow](.github/workflows/release.yml) checks the tag against the manifest, reruns the checks, and publishes the GitHub release with the changelog notes.
 
 Conventions for contributors and agents are in [`AGENTS.md` › Maintaining this package](AGENTS.md#maintaining-this-package).
 
@@ -234,10 +235,12 @@ Conventions for contributors and agents are in [`AGENTS.md` › Maintaining this
 .
 ├── README.md                          ← you are here
 ├── LICENSE                            ← MIT
+├── CHANGELOG.md                       ← release notes, one section per version
 ├── GUIDELINES.md                      ← the design language, with Apple sources
 ├── AGENTS.md                          ← instructions for any coding agent
 ├── .claude/CLAUDE.md                  ← Claude Code additions (imports AGENTS.md)
 ├── .github/workflows/ci.yml           ← CI: generated files, tests (Python 3.9–3.13), plugin validation
+├── .github/workflows/release.yml      ← publishes the GitHub release when a v* tag is pushed
 ├── .claude-plugin/
 │   ├── plugin.json                    ← plugin manifest
 │   └── marketplace.json               ← marketplace “eg4y”
