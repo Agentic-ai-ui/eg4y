@@ -278,6 +278,17 @@ class WebTests(LintCase):
         font.write_bytes(b"\x00")
         self.assertEqual({f.rule for f in hig_lint.lint_file(font, RULES, SYSTEM_HEX)}, {"TYP-04"})
 
+    def test_skill_code_snippets_pass_the_checker(self):
+        import re
+        refs = ROOT / "skills" / "apple-design-language" / "references"
+        count = 0
+        for md in sorted(refs.glob("*.md")):
+            for i, (lang, code) in enumerate(re.findall(r"```(swift|css|html)\n(.*?)```", md.read_text(encoding="utf-8"), re.S)):
+                findings = self.lint(f"{md.stem}-{i:02d}.{lang}", code)
+                self.assertEqual([], [(f.rule, f.line, f.message) for f in findings], f"{md.name} snippet {i} ({lang})")
+                count += 1
+        self.assertGreater(count, 20)
+
     def test_tokens_css_is_clean(self):
         tokens = ROOT / "skills" / "apple-design-language" / "assets" / "tokens.css"
         self.assertEqual([], hig_lint.lint_file(tokens, RULES, SYSTEM_HEX))

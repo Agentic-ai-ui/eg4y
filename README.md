@@ -55,7 +55,7 @@ AI agents write a lot of interface code for iPhone, iPad, Mac, Apple TV, Apple V
 | [**`rules/`**](rules/README.md) | Enforceable rules with stable IDs (e.g., `COL-01`), RFC 2119 levels, severities, platforms, and sources; generated [`rules.json`](rules/rules.json) for tools | **239 rules** · 77 errors · 160 warnings · 2 info |
 | [**`skills/apple-design-language/`**](skills/apple-design-language/SKILL.md) | A Claude Code skill: 7-step workflow, non-negotiables, and 10 on-demand references (platforms, navigation, components, Liquid Glass, design tokens, accessibility, writing, SwiftUI recipes, web adaptation, review checklist), plus design tokens and evals | 97-line `SKILL.md` · 10 references |
 | [**`AGENTS.md`**](AGENTS.md) · [**`.claude/CLAUDE.md`**](.claude/CLAUDE.md) | Shared instructions any coding agent reads (Codex, Cursor, Copilot, Jules, Amp, Claude Code), plus Claude-specific additions | 116 + 10 lines |
-| [**`hooks/`**](hooks/README.md) | A rule checker for Swift, CSS, HTML, JS/TS/JSX, plists, and font files; a prompt router; a session brief — wired as Claude Code hooks and usable from any CLI or CI | 21 automated rules · 59 tests |
+| [**`hooks/`**](hooks/README.md) | A rule checker for Swift, CSS, HTML, JS/TS/JSX, plists, and font files; a prompt router; a session brief — wired as Claude Code hooks and usable from any CLI or CI | 21 automated rules · 60 tests |
 | [**`.claude-plugin/`**](.claude-plugin/plugin.json) | Plugin manifest and marketplace so the whole package installs with `/plugin` | v1.0.0 |
 
 ---
@@ -184,7 +184,7 @@ Everything in this package was researched rather than recalled:
 - **API names** (~150 SwiftUI, UIKit, and AppKit symbols) checked against Apple’s published declarations and availability. The Swift snippets weren’t compiled here (that needs Xcode), and each reference says so.
 - **Web support** checked against MDN browser-compat-data 8.1.3 and WebKit’s documentation — for example, `prefers-reduced-transparency` isn’t supported in Safari, so the web tokens also fall back on Increase Contrast.
 - **Computed, not assumed:** the WCAG contrast of every system color. In light mode only indigo reaches 4.5:1 as text on white; every increased-contrast variant does ([`design-tokens.md`](skills/apple-design-language/references/design-tokens.md#contrast-of-system-colors)).
-- **Tested:** 59 hook tests on Python 3.9–3.13; every Swift/CSS/HTML snippet in the skill passes the checker; `tokens.css` verified in Chromium across light, dark, Increase Contrast, and Reduce Motion; the plugin passes `claude plugin validate --strict`, installs, and its hooks fire in a live session.
+- **Tested:** 60 hook tests on Python 3.9–3.13, including one that runs every Swift/CSS/HTML snippet in the skill through the checker; `tokens.css` verified in Chromium across light, dark, Increase Contrast, and Reduce Motion; the plugin passes `claude plugin validate --strict`, installs, and its hooks fire in a live session.
 - **Consistency enforced by tools:** rule IDs, levels, anchors, and cross-references are validated by `build_rules.py`; tokens by `build_tokens.py`; checker coverage of every automated rule by the test suite.
 
 ---
@@ -209,6 +209,8 @@ python3 -m unittest discover -s hooks/tests
 # Validate the plugin and marketplace
 claude plugin validate . && claude plugin validate .claude-plugin/plugin.json
 ```
+
+[CI](.github/workflows/ci.yml) runs all of these on every pull request and every push to `main`: generated files up to date, the hook tests on Python 3.9–3.13, and strict plugin validation.
 
 ---
 
@@ -235,6 +237,7 @@ Conventions for contributors and agents are in [`AGENTS.md` › Maintaining this
 ├── GUIDELINES.md                      ← the design language, with Apple sources
 ├── AGENTS.md                          ← instructions for any coding agent
 ├── .claude/CLAUDE.md                  ← Claude Code additions (imports AGENTS.md)
+├── .github/workflows/ci.yml           ← CI: generated files, tests (Python 3.9–3.13), plugin validation
 ├── .claude-plugin/
 │   ├── plugin.json                    ← plugin manifest
 │   └── marketplace.json               ← marketplace “eg4y”
@@ -255,7 +258,7 @@ Conventions for contributors and agents are in [`AGENTS.md` › Maintaining this
     ├── hooks.json                     ← plugin hook wiring
     ├── settings.example.json          ← project hook wiring
     ├── scripts/                       ← hig_lint.py · prompt_router.py · session_context.py
-    └── tests/test_hooks.py            ← 59 tests
+    └── tests/test_hooks.py            ← 60 tests
 ```
 
 ---

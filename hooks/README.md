@@ -26,7 +26,7 @@ flowchart LR
 | [`scripts/hig_lint.py`](scripts/hig_lint.py) | Rule checker — CLI and PostToolUse hook |
 | [`scripts/prompt_router.py`](scripts/prompt_router.py) | UserPromptSubmit hook — routes Apple UI requests to skill references |
 | [`scripts/session_context.py`](scripts/session_context.py) | SessionStart hook — compact brief in Apple/web UI projects |
-| [`tests/test_hooks.py`](tests/test_hooks.py) | 59 tests: every rule, suppression, CLI, and the exact hook protocol |
+| [`tests/test_hooks.py`](tests/test_hooks.py) | 60 tests: every rule, suppression, CLI, the exact hook protocol, and the skill’s code snippets |
 
 ## Install
 
@@ -116,7 +116,7 @@ All handlers use exec form (`"command": "python3", "args": [...]`), as the hooks
 python3 -m unittest discover -s hooks/tests -v
 ```
 
-59 tests cover positive and negative cases for every hook rule, suppression (with and without reasons, multiple IDs, line above), CLI exit codes and JSON output, the PostToolUse stdin/stdout contract (block vs. context, silence, severity filter, disable switch, malformed input, output cap), prompt routing (including unrelated “apple” prompts that must stay silent), session context (brief, already-instructed, non-UI projects), and both configuration files. Verified on Python 3.9, 3.10, 3.11, and 3.13. Every Swift, CSS, and HTML snippet in the skill’s references also passes the checker.
+60 tests cover positive and negative cases for every hook rule, suppression (with and without reasons, multiple IDs, line above), CLI exit codes and JSON output, the PostToolUse stdin/stdout contract (block vs. context, silence, severity filter, disable switch, malformed input, output cap), prompt routing (including unrelated “apple” prompts that must stay silent), session context (brief, already-instructed, non-UI projects), both configuration files, and every Swift, CSS, and HTML snippet in the skill’s references (each must pass the checker). CI ([`.github/workflows/ci.yml`](../.github/workflows/ci.yml)) runs the suite on Python 3.9, 3.10, 3.11, 3.12, and 3.13.
 
 ## Adding a detector
 
