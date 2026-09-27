@@ -83,23 +83,32 @@ Button("Done") { save() }
 
 Declaration: `func glassEffect(_ glass: Glass = .regular, in shape: some Shape = DefaultGlassEffectShape()) -> some View`. Default shape is a capsule behind the content. `Glass` provides `.regular`, `.clear`, `.identity`, and the modifiers `.tint(_:)` and `.interactive(_:)`.
 
+A floating custom control (functional layer only — GLS-01):
+
 ```swift
-// A floating custom control (functional layer only — GLS-01)
 Label("Record", systemImage: "record.circle")
     .labelStyle(.iconOnly)
     .font(.title2)
     .padding()
     .glassEffect(.regular.interactive())   // reacts to touch and pointer like system buttons
+```
 
-// Larger component: use a rounded rectangle instead of the default capsule
+A larger component — use a rounded rectangle instead of the default capsule:
+
+```swift
 MapControls()
     .padding()
     .glassEffect(in: .rect(cornerRadius: 16))
+```
 
-// Over a photo or video: clear variant (GLS-05). Add a dimming layer if the media is bright.
+Over a photo or video — the clear variant (GLS-05); add a dimming layer if the media is bright:
+
+```swift
 PlaybackOverlay()
     .glassEffect(.clear)
 ```
+
+When several of these appear together, group them in one `GlassEffectContainer` (next section).
 
 Apply `glassEffect` **after** other modifiers that change appearance — it captures the rendered content.
 
