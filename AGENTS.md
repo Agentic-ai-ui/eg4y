@@ -120,6 +120,6 @@ claude plugin validate . && claude plugin validate .claude-plugin/plugin.json
 - After editing rules or tokens, run both build scripts; commit the regenerated `rules/rules.json`, `rules/README.md` index, the token files (`assets/tokens.css`, `tokens.ts`, `tailwind.css`, `tokens.native.ts`), and `references/design-tokens.md` with the change.
 - Web and React Native recipes are real code: type-check and run them before changing a reference, and keep `components.css` shared by every web stack.
 - A new `Check: hook` rule needs a detector and a test in `hooks/` in the same change.
-- Bump `version` in `.claude-plugin/plugin.json` (semantic versioning) for every release — installed users stay on the manifest version until it changes. Add the version’s section to `CHANGELOG.md`; after merging, pushing the tag `v<version>` on `main` publishes the release.
+- Bump `version` in `.claude-plugin/plugin.json` (semantic versioning) for every release — installed users stay on the manifest version until it changes. Add the version’s section to `CHANGELOG.md`; after merging, run **Actions › Release › Run workflow** on `main` (or push the tag `v<version>`) to publish the release.
 - Use ASCII hyphens in headings so anchors stay stable; keep `SKILL.md` under 500 lines and this file under 200.
 - Credit stays with **Edison Augustin X.** in README, GUIDELINES, rules, and skill files.

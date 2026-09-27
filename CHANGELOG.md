@@ -2,7 +2,13 @@
 
 All notable changes to Apple Design Language are recorded here. Created by Edison Augustin X.
 
-The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Each version matches `version` in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json); pushing the tag `v<version>` publishes the GitHub release with that version’s notes.
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Each version matches `version` in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json); running the Release workflow (or pushing the tag `v<version>`) publishes the GitHub release with that version’s notes.
+
+## [Unreleased]
+
+### Changed
+
+- **Release workflow** — can be started from GitHub with **Actions › Release › Run workflow**: it reads the version from `plugin.json` (optionally confirmed by an input), runs the checks, creates the tag at the tip of `main`, and publishes. When a release already exists — for example, one created on github.com — the workflow updates its title and notes from `CHANGELOG.md` instead of failing.
 
 ## [1.0.0] - 2026-09-27
 
@@ -19,4 +25,5 @@ First release: a researched design system that teaches AI agents to build apps f
 - **CI** — generated files up to date, hook tests on Python 3.9–3.13, and strict plugin validation on every pull request; tagged releases publish automatically.
 - **`LICENSE`** — MIT.
 
+[Unreleased]: https://github.com/Agentic-ai-ui/eg4y/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/Agentic-ai-ui/eg4y/releases/tag/v1.0.0

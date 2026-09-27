@@ -269,7 +269,7 @@ Apple updates the HIG throughout the year; each HIG page has a change log.
 3. Update **skill references** and `assets/tokens.json`, then run `build_tokens.py`.
 4. If a rule is `Check: hook`, update its detector and tests in **`hooks/`**.
 5. Bump `version` in **`.claude-plugin/plugin.json`** so installed users receive the update, and add that version’s section to **[`CHANGELOG.md`](CHANGELOG.md)**.
-6. After the change merges, push the tag `v<version>` on `main`; the [release workflow](.github/workflows/release.yml) checks the tag against the manifest, reruns the checks, and publishes the GitHub release with the changelog notes.
+6. After the change merges, release it: on GitHub, open **Actions › Release › Run workflow** (on `main`) — or push the tag `v<version>` on `main`. The [release workflow](.github/workflows/release.yml) checks the version against the manifest, reruns the checks, creates the tag if needed, and publishes the GitHub release with the changelog notes. If a release was already created by hand, it updates its notes instead.
 
 Conventions for contributors and agents are in [`AGENTS.md` › Maintaining this package](AGENTS.md#maintaining-this-package).
 
@@ -286,7 +286,7 @@ Conventions for contributors and agents are in [`AGENTS.md` › Maintaining this
 ├── AGENTS.md                          ← instructions for any coding agent
 ├── .claude/CLAUDE.md                  ← Claude Code additions (imports AGENTS.md)
 ├── .github/workflows/ci.yml           ← CI: generated files, tests (Python 3.9–3.13), plugin validation
-├── .github/workflows/release.yml      ← publishes the GitHub release when a v* tag is pushed
+├── .github/workflows/release.yml      ← publishes the GitHub release (Run workflow button or v* tag)
 ├── .claude-plugin/
 │   ├── plugin.json                    ← plugin manifest
 │   └── marketplace.json               ← marketplace “eg4y”
