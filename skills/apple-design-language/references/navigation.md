@@ -3,6 +3,7 @@
 > Part of the **apple-design-language** skill — Created by Edison Augustin X.
 > Source of truth: [`GUIDELINES.md` §13.2–§13.5](../../../GUIDELINES.md#13-components) · Rules: [`rules/10-navigation.md`](../../../rules/10-navigation.md)
 > Apple sources: [Tab bars](https://developer.apple.com/design/human-interface-guidelines/tab-bars) · [Sidebars](https://developer.apple.com/design/human-interface-guidelines/sidebars) · [Split views](https://developer.apple.com/design/human-interface-guidelines/split-views) · [Toolbars](https://developer.apple.com/design/human-interface-guidelines/toolbars) · [Search fields](https://developer.apple.com/design/human-interface-guidelines/search-fields) · [Adopting Liquid Glass](https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass)
+> Implementations: [SwiftUI](swiftui-recipes.md) · [React](react-recipes.md#3-app-shell-tab-bar--sidebar) · [HTML + CSS](html-css-recipes.md) · [Tailwind](tailwind.md#3-app-shell-with-container-queries) · [Vue and Svelte](vue-svelte.md) · [Next.js](nextjs.md#2-app-shell-with-routing) · [React Native](react-native.md#4-navigation-native-tabs-and-stacks)
 
 SwiftUI names were checked against Apple’s published declarations; snippets weren’t compiled here.
 

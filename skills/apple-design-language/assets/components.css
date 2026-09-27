@@ -1,0 +1,553 @@
+/*
+ * Apple Design Language — web components
+ * Created by Edison Augustin X.
+ *
+ * Hand-written component styles shared by the HTML + CSS, React, Next.js, Vue, and Svelte recipes, so every
+ * stack renders the same design. Load after tokens.css:
+ *     <link rel="stylesheet" href="tokens.css">  <link rel="stylesheet" href="components.css">
+ *
+ * These are web adaptations of Apple’s component guidance, not replicas of system UI (BRD-04): no status bars,
+ * home indicators, or pixel copies of native chrome. Structure, sizing, and behavior follow the HIG; values
+ * marked “project default” are not Apple specifications.
+ *
+ * Browser support (MDN browser-compat-data 8.1.3): <dialog> Safari 15.4 · container queries 16 · color-mix()
+ * 16.2 · popover 17 · @starting-style 17.5 · anchor positioning 26 (centered fallback before that).
+ */
+
+/* --------------------------------------------------------------------------- App shell + adaptive navigation
+ * One navigation list, two presentations (NAV-06, SYNC-01):
+ *   compact width  → floating tab bar at the bottom (iPhone, narrow windows)
+ *   regular width  → sidebar at the inline start (iPad, Mac, wide windows)
+ * The switch uses the app's own width (a container query), never the device (LAY-01).
+ */
+.adl-app {
+  container: adl-app / inline-size;
+  min-height: 100dvh;
+  background: var(--adl-background);
+}
+.adl-app__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 100dvh;
+}
+.adl-app__main {
+  min-width: 0;
+  /* room for the floating tab bar and the home-indicator area */
+  padding-bottom: calc(var(--adl-control-size) + 2.5rem + var(--adl-safe-bottom));
+}
+
+.adl-nav {
+  position: fixed;
+  inset-inline: max(16px, var(--adl-safe-left)) max(16px, var(--adl-safe-right));
+  bottom: max(12px, var(--adl-safe-bottom));
+  z-index: 10;
+  border-radius: 999px;
+  padding: 4px; /* px, like the label cap below, so the bar keeps room for its items at large text sizes */
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.12); /* project default */
+}
+.adl-nav__list {
+  display: flex;
+  justify-content: space-around;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.adl-nav__list > li {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.adl-nav__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  min-width: var(--adl-control-size);
+  min-height: var(--adl-control-size);
+  padding: min(0.375rem, 6px) min(0.5rem, 8px);
+  border-radius: 999px;
+  color: var(--adl-label);
+  text-decoration: none;
+  /* 11 px at default size (the iOS minimum, TYP-02). Like the system tab bar, whose labels don't grow with
+     Dynamic Type, the compact bar caps its label at 14 px; page zoom still enlarges it, and the sidebar
+     (regular width) scales fully. */
+  font: 600 min(0.6875rem, 14px)/1.2 var(--adl-font-text);
+}
+.adl-nav__link svg {
+  width: min(1.5rem, 28px);
+  height: min(1.5rem, 28px);
+  flex: none;
+}
+/* Last resort for very long labels: truncate inside the item instead of running into neighbors;
+   the full text stays in the DOM, so VoiceOver still reads it. */
+.adl-nav__link > span:last-child {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.adl-nav__link[aria-current="page"] {
+  color: var(--adl-accent-text);
+  background: var(--adl-background-grouped-row);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.12); /* project default */
+}
+.adl-nav__link:active { background: var(--adl-fill); }
+
+@container adl-app (min-width: 48rem) {
+  .adl-app__layout { grid-template-columns: 16rem minmax(0, 1fr); }
+  .adl-app__main { padding-bottom: var(--adl-safe-bottom); }
+  .adl-nav {
+    position: sticky;
+    inset: 0 auto auto; /* reset the tab bar's offsets: sticky treats them as scroll offsets */
+    align-self: start;
+    box-sizing: border-box;
+    height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+    padding: max(1rem, var(--adl-safe-top)) 0.75rem 1rem max(0.75rem, var(--adl-safe-left));
+    border-width: 0;
+    border-inline-end: 1px solid var(--adl-separator);
+    overflow-y: auto;
+  }
+  .adl-nav__list { flex-direction: column; justify-content: start; gap: 0.125rem; }
+  .adl-nav__list > li { flex: none; }
+  .adl-nav__link {
+    flex-direction: row;
+    justify-content: start;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.625rem;
+    font: var(--adl-text-body-weight) var(--adl-text-body-size)/var(--adl-text-body-line-height) var(--adl-font-text);
+  }
+  .adl-nav__link svg { width: 1.5rem; height: 1.5rem; }
+  .adl-nav__link[aria-current="page"] {
+    color: var(--adl-on-accent);
+    background: var(--adl-accent-fill);
+    box-shadow: none;
+    font-weight: 600;
+  }
+}
+
+/* --------------------------------------------------------------------------- Toolbar and titles */
+.adl-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--adl-control-size);
+  padding: max(0.5rem, var(--adl-safe-top)) max(1rem, var(--adl-safe-right)) 0.5rem max(1rem, var(--adl-safe-left));
+  border-width: 0 0 1px;
+}
+.adl-toolbar__title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font: var(--adl-text-headline-weight) var(--adl-text-headline-size)/var(--adl-text-headline-line-height) var(--adl-font-text);
+  text-align: center;
+}
+.adl-toolbar__leading,
+.adl-toolbar__trailing {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+.adl-toolbar__trailing { justify-content: end; } /* the one prominent action goes last (NAV-11) */
+.adl-large-title {
+  margin: 0.5rem 0 0.75rem;
+  padding-inline: max(1rem, var(--adl-safe-left)) max(1rem, var(--adl-safe-right));
+  font: 700 var(--adl-text-large-title-size)/var(--adl-text-large-title-line-height) var(--adl-font-text);
+}
+
+/* --------------------------------------------------------------------------- Buttons
+ * Styles, not sizes, distinguish choices (CMP-02); every button has a press state (CMP-03).
+ * .adl-button--prominent: at most one or two per view (CMP-01); never destructive (CMP-04).
+ */
+.adl-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-width: var(--adl-control-size);
+  min-height: var(--adl-control-size);
+  padding: 0 var(--adl-control-padding-bezeled);
+  border: 0;
+  border-radius: 999px;
+  background: var(--adl-fill);
+  color: var(--adl-label);
+  font: 600 var(--adl-text-body-size)/var(--adl-text-body-line-height) var(--adl-font-text);
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity var(--adl-motion-duration) var(--adl-motion-easing), background-color var(--adl-motion-duration);
+}
+.adl-button:active { opacity: 0.6; }
+.adl-button:disabled,
+.adl-button[aria-disabled="true"] { opacity: 0.4; cursor: not-allowed; }
+.adl-button--prominent { background: var(--adl-accent-fill); color: var(--adl-on-accent); }
+.adl-button--plain { background: transparent; padding-inline: 0.5rem; color: var(--adl-accent-text); }
+/* Destructive: red text with a hairline, never a fill (CMP-04, CMP-14). Like all colored text, keep it on the
+   page background or a list row — no HIG red reaches 4.5:1 on gray fills in light mode. */
+.adl-button--destructive { color: var(--adl-destructive-text); background: transparent; box-shadow: inset 0 0 0 1px currentColor; }
+.adl-button--plain.adl-button--destructive { box-shadow: none; }
+.adl-button svg { width: 1.25rem; height: 1.25rem; flex: none; }
+
+/* Icon-only button: 44 × 44 hit region; the accessible name comes from aria-label (A11Y-03). */
+.adl-icon-button {
+  display: inline-grid;
+  place-items: center;
+  min-width: var(--adl-control-size);
+  min-height: var(--adl-control-size);
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--adl-accent-text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.adl-icon-button:active { background: var(--adl-fill); }
+.adl-icon-button svg { width: 1.375rem; height: 1.375rem; }
+
+/* --------------------------------------------------------------------------- Inset grouped list */
+.adl-grouped {
+  background: var(--adl-background-grouped);
+  padding: 0.25rem max(1rem, var(--adl-safe-right)) 1.5rem max(1rem, var(--adl-safe-left));
+}
+.adl-list-section { margin-block: 0 1.5rem; }
+.adl-list-section__header,
+.adl-list-section__footer {
+  margin: 0;
+  padding: 0.375rem 1rem;
+  color: var(--adl-secondary-label);
+  font: var(--adl-text-footnote-weight) var(--adl-text-footnote-size)/var(--adl-text-footnote-line-height) var(--adl-font-text);
+}
+.adl-list-section__header { font-weight: 600; }
+.adl-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: var(--adl-background-grouped-row);
+}
+.adl-list__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: var(--adl-control-size);
+  padding: 0.5rem 1rem;
+  box-sizing: border-box;
+  color: var(--adl-label);
+  text-decoration: none;
+  position: relative;
+}
+.adl-list > li + li > .adl-list__row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline: 1rem 0; /* inset separator */
+  border-top: 1px solid var(--adl-separator);
+}
+.adl-list__title { flex: 1; min-width: 0; }
+.adl-list__subtitle {
+  display: block;
+  color: var(--adl-secondary-label);
+  font: var(--adl-text-subheadline-weight) var(--adl-text-subheadline-size)/var(--adl-text-subheadline-line-height) var(--adl-font-text);
+}
+.adl-list__value { color: var(--adl-secondary-label); }
+a.adl-list__row:active,
+button.adl-list__row:active { background: var(--adl-fill); }
+button.adl-list__row {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+/* Disclosure indicator for rows that navigate (CMP-19); drawn with borders, mirrored in right-to-left. */
+/* An action row (e.g., “Delete All”): the row is the button. */
+.adl-list__row--destructive { color: var(--adl-destructive-text); }
+.adl-list__row--action { color: var(--adl-accent-text); }
+.adl-list__row--link::after {
+  content: "";
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-top: 2px solid var(--adl-secondary-label);
+  border-right: 2px solid var(--adl-secondary-label);
+  transform: rotate(45deg);
+  margin-inline-end: 0.25rem;
+}
+.adl-list__row--link:dir(rtl)::after { transform: rotate(-135deg); }
+
+/* --------------------------------------------------------------------------- Switch (CMP-23: in list rows)
+ * A native checkbox with role="switch": the label row is the 44 px hit target; state shows by thumb
+ * position as well as color (COL-03).
+ */
+.adl-switch-row { cursor: pointer; }
+.adl-switch {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  position: relative;
+  width: 3.1875rem;  /* 51 px track — project default */
+  height: 1.9375rem; /* 31 px */
+  margin: 0;
+  border-radius: 999px;
+  background: var(--adl-fill);
+  cursor: pointer;
+  transition: background-color var(--adl-motion-duration) var(--adl-motion-easing);
+}
+.adl-switch::before {
+  content: "";
+  position: absolute;
+  top: 0.125rem;
+  inset-inline-start: 0.125rem;
+  width: 1.6875rem;
+  height: 1.6875rem;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.2);
+  transition: translate var(--adl-motion-duration) var(--adl-motion-easing);
+}
+.adl-switch:checked { background: var(--adl-green); }
+.adl-switch:checked::before { translate: 1.25rem 0; }
+.adl-switch:checked:dir(rtl)::before { translate: -1.25rem 0; }
+.adl-switch:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* --------------------------------------------------------------------------- Segmented control (CMP-24, CMP-25)
+ * Native radio buttons in a fieldset: arrow keys, grouping, and state come from the browser.
+ */
+.adl-segmented {
+  display: flex;
+  margin: 0;
+  padding: 0.125rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--adl-fill);
+}
+.adl-segmented__option {
+  flex: 1 1 0;
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: var(--adl-control-size);
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  font: 600 var(--adl-text-subheadline-size)/var(--adl-text-subheadline-line-height) var(--adl-font-text);
+  cursor: pointer;
+}
+.adl-segmented__option input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.adl-segmented__option:has(input:checked) {
+  background: var(--adl-background-grouped-row);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.12);
+}
+.adl-segmented__option:has(input:focus-visible) { outline: 3px solid var(--adl-accent); outline-offset: 2px; }
+
+/* --------------------------------------------------------------------------- Text fields (CMP-21, CMP-22, WRT-07) */
+.adl-field { display: grid; gap: 0.375rem; }
+.adl-field__label { font-weight: 600; }
+.adl-field__input {
+  min-height: var(--adl-control-size);
+  padding: 0 0.875rem;
+  border: 1px solid transparent;
+  border-radius: 0.625rem;
+  background: var(--adl-fill);
+  color: var(--adl-label);
+  font: inherit;
+}
+.adl-field__input::placeholder { color: var(--adl-secondary-label); }
+.adl-field__hint {
+  margin: 0;
+  color: var(--adl-secondary-label);
+  font: var(--adl-text-footnote-weight) var(--adl-text-footnote-size)/var(--adl-text-footnote-line-height) var(--adl-font-text);
+}
+/* Errors: border + text, never color alone (COL-03). */
+.adl-field__input[aria-invalid="true"] { border-color: var(--adl-destructive); }
+.adl-field__error {
+  margin: 0;
+  color: var(--adl-label);
+  font: var(--adl-text-footnote-weight) var(--adl-text-footnote-size)/var(--adl-text-footnote-line-height) var(--adl-font-text);
+}
+.adl-field__error::before { content: "⚠︎ "; color: var(--adl-destructive); }
+.adl-search { position: relative; }
+.adl-search .adl-field__input { width: 100%; box-sizing: border-box; border-radius: 999px; padding-inline: 1rem; }
+
+/* --------------------------------------------------------------------------- Sheets and alerts (<dialog>)
+ * One modal at a time (CMP-07) with an obvious dismissal (CMP-08). Esc closes both (the dialog's cancel event).
+ */
+.adl-sheet,
+.adl-alert {
+  border: 0;
+  padding: 0;
+  color: var(--adl-label);
+  background: var(--adl-background-grouped-row);
+  opacity: 1;
+  transition:
+    opacity var(--adl-motion-duration) var(--adl-motion-easing),
+    translate var(--adl-motion-duration) var(--adl-motion-easing),
+    overlay var(--adl-motion-duration) allow-discrete,
+    display var(--adl-motion-duration) allow-discrete;
+}
+.adl-sheet::backdrop,
+.adl-alert::backdrop { background: rgb(0 0 0 / 0.3); } /* project default dimming */
+
+/* compact: sheet rises from the bottom edge */
+.adl-sheet {
+  width: 100%;
+  max-width: none;
+  max-height: 92dvh;
+  margin: auto 0 0;
+  border-radius: 1.25rem 1.25rem 0 0;
+  padding-bottom: var(--adl-safe-bottom);
+  translate: 0 0;
+}
+.adl-sheet:not([open]) { opacity: 0; translate: 0 2rem; }
+@starting-style {
+  .adl-sheet[open] { opacity: 0; translate: 0 2rem; }
+}
+/* regular: centered card */
+@media (min-width: 48rem) {
+  .adl-sheet {
+    width: min(36rem, calc(100% - 4rem));
+    max-height: 85dvh;
+    margin: auto;
+    border-radius: 1.25rem;
+    padding-bottom: 0;
+  }
+}
+.adl-sheet__header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--adl-control-size);
+  padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+  background: inherit;
+}
+.adl-sheet__title {
+  flex: 1;
+  margin: 0;
+  text-align: center;
+  font: var(--adl-text-headline-weight) var(--adl-text-headline-size)/var(--adl-text-headline-line-height) var(--adl-font-text);
+}
+.adl-sheet__header > .adl-button { flex: none; } /* Cancel leading, Done trailing (CMP-09) */
+.adl-sheet__body { padding: 0 1rem 1.5rem; overflow-y: auto; }
+
+.adl-alert {
+  width: min(20rem, calc(100% - 3rem));
+  margin: auto;
+  border-radius: 1.25rem;
+  text-align: center;
+}
+.adl-alert:not([open]) { opacity: 0; }
+@starting-style {
+  .adl-alert[open] { opacity: 0; }
+}
+.adl-alert__content { padding: 1.25rem 1.25rem 1rem; }
+.adl-alert__title {
+  margin: 0 0 0.25rem;
+  font: var(--adl-text-headline-weight) var(--adl-text-headline-size)/var(--adl-text-headline-line-height) var(--adl-font-text);
+}
+.adl-alert__message {
+  margin: 0;
+  font: var(--adl-text-footnote-weight) var(--adl-text-footnote-size)/var(--adl-text-footnote-line-height) var(--adl-font-text);
+}
+/* Two buttons side by side (Cancel leading, default trailing); three stack with Cancel last (CMP-12, CMP-13). */
+.adl-alert__actions {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 0.5rem;
+  padding: 0 1rem 1rem;
+}
+.adl-alert__actions:has(> :nth-child(3)) { grid-auto-flow: row; }
+.adl-alert__actions > .adl-button { width: 100%; }
+
+/* --------------------------------------------------------------------------- Menus (popover) — CMP-16, CMP-17 */
+.adl-menu {
+  min-width: 14rem;
+  max-width: calc(100% - 2rem);
+  margin: auto;
+  padding: 0.375rem;
+  border-radius: 1rem;
+  color: var(--adl-label);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.18); /* project default */
+}
+/* Menus hold text over arbitrary content: keep the glass nearly opaque so labels stay legible (LAY-08). */
+.adl-menu.adl-glass { background: color-mix(in srgb, var(--adl-background-grouped-row) 94%, transparent); }
+@supports (position-area: bottom) {
+  .adl-menu[popover] {
+    margin: 0.25rem 0;
+    position-area: bottom span-left;
+    position-try-fallbacks: flip-block, flip-inline;
+  }
+}
+.adl-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: var(--adl-control-size);
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: 0.625rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.adl-menu__item:active,
+.adl-menu__item:hover { background: var(--adl-fill); }
+.adl-menu__item--destructive { color: var(--adl-destructive-text); }
+.adl-menu__separator { height: 1px; margin: 0.25rem 0.75rem; background: var(--adl-separator); border: 0; }
+
+/* --------------------------------------------------------------------------- Empty state and progress */
+.adl-empty {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+.adl-empty__title {
+  margin: 0;
+  font: var(--adl-text-title3-weight) var(--adl-text-title3-size)/var(--adl-text-title3-line-height) var(--adl-font-text);
+}
+.adl-empty__message { margin: 0; color: var(--adl-secondary-label); }
+.adl-progress { width: 100%; accent-color: var(--adl-accent); }
+
+/* --------------------------------------------------------------------------- Accessibility modes */
+@media (prefers-contrast: more) {
+  .adl-field__input,
+  .adl-segmented,
+  .adl-switch,
+  .adl-button:not(.adl-button--plain),
+  .adl-menu,
+  .adl-sheet,
+  .adl-alert { outline: 1px solid var(--adl-label); outline-offset: -1px; }
+  .adl-nav__link[aria-current="page"] { outline: 2px solid var(--adl-accent); outline-offset: -2px; }
+}
+
+/* Reduce Motion: no sliding or scaling; state changes still show (MOT-02, MOT-03). tokens.css also sets
+   --adl-motion-duration to 1ms here. */
+@media (prefers-reduced-motion: reduce) {
+  .adl-sheet:not([open]) { translate: 0 0; }
+  @starting-style {
+    .adl-sheet[open] { translate: 0 0; }
+  }
+}

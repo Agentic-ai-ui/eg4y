@@ -8,7 +8,7 @@ An accessible interface is **intuitive, perceivable, and adaptable**. Build it i
 
 ## Contents
 1. [Requirements at a glance](#1-requirements-at-a-glance)
-2. [API map: SwiftUI · UIKit · AppKit · Web](#2-api-map)
+2. [API map: SwiftUI · UIKit · AppKit · Web](#2-api-map) — plus [React · Vue · Svelte · React Native](#javascript-stacks)
 3. [Dynamic Type and text scaling](#3-dynamic-type-and-text-scaling)
 4. [VoiceOver: labels, structure, announcements](#4-voiceover)
 5. [Reduce Motion, Reduce Transparency, Increase Contrast](#5-display-accommodations)
@@ -54,6 +54,24 @@ An accessible interface is **intuitive, perceivable, and adaptable**. Build it i
 | Increase Contrast | `@Environment(\.colorSchemeContrast)` | `traitCollection.accessibilityContrast` | `accessibilityDisplayShouldIncreaseContrast` | `@media (prefers-contrast: more)` |
 | Text size | Text styles, `@ScaledMetric`, `Font.custom(_:size:relativeTo:)`, `dynamicTypeSize.isAccessibilitySize` | `UIFont.preferredFont(forTextStyle:)`, `UIFontMetrics`, `adjustsFontForContentSizeCategory` | Text styles (no Dynamic Type) | `rem` units; WebKit `font: -apple-system-body` |
 | Tooltip / help | `.help(_:)` | — | `toolTip` | `title` (supplementary only) |
+
+### JavaScript stacks
+
+The web columns apply to React, Next.js, Vue, and Svelte alike; the framework only changes how you bind attributes. React Native maps to UIKit accessibility on iOS. Verified code: [`react-recipes.md`](react-recipes.md), [`vue-svelte.md`](vue-svelte.md), [`react-native.md`](react-native.md).
+
+| Need | React / Next.js | Vue / Svelte | React Native |
+|---|---|---|---|
+| Label | Visible text, `aria-label={…}`, `<label htmlFor>` | `:aria-label` / `aria-label={…}`, `<label for>` | `accessibilityLabel` |
+| Role | Native element first (`<button>`, `<a>`, `<dialog>`), then `role` | same | `role` / `accessibilityRole` |
+| State | `aria-checked`, `aria-current="page"`, `aria-expanded`, `disabled` | same | `accessibilityState`, `aria-checked`, `aria-selected` |
+| Hide decorative | `aria-hidden="true"` on icons; `alt=""` | same | `aria-hidden`, `accessibilityElementsHidden` |
+| Ids for relationships | `useId()` | `useId()` (Vue 3.5) / `$props.id()` (Svelte 5.20) | `nativeID` |
+| Modal focus | `<dialog>` + `showModal()` | same | `Modal`, `accessibilityViewIsModal` |
+| Announce change | `aria-live="polite"` region | same | `AccessibilityInfo.announceForAccessibility()` |
+| Reduce Motion | `usePrefersReducedMotion()` (useSyncExternalStore) or CSS | `useMediaQuery` / `prefersReducedMotion` (svelte/motion) | `AccessibilityInfo.isReduceMotionEnabled()` |
+| Increase Contrast | CSS via `tokens.css`; `usePrefersMoreContrast()` | CSS; `MediaQuery("prefers-contrast: more")` | Automatic with `PlatformColor` |
+| Text size | `rem` text styles (`text.*` from tokens.ts) | same | `allowFontScaling` (default) + `dynamicTypeRamp` |
+| Hit target | `min-height: var(--adl-control-size)` | same | `minHeight: 44`, `hitSlop` |
 
 ## 3. Dynamic Type and text scaling
 

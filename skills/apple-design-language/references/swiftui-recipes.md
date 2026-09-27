@@ -3,7 +3,7 @@
 > Part of the **apple-design-language** skill — Created by Edison Augustin X.
 > Rules are cited inline by ID ([`rules/`](../../../rules/README.md)). API names were checked against Apple’s published declarations (September 2026); the snippets weren’t compiled in this repository. Liquid Glass APIs require the 26 SDKs — guard with `if #available` when supporting earlier releases.
 
-Each recipe shows the idiomatic, rule-compliant way to build a common screen element. Prefer these patterns over hand-rolled equivalents.
+Each recipe shows the idiomatic, rule-compliant way to build a common screen element. Prefer these patterns over hand-rolled equivalents. The same elements for other stacks: [React](react-recipes.md) · [HTML + CSS](html-css-recipes.md) · [Tailwind](tailwind.md) · [Vue and Svelte](vue-svelte.md) · [Next.js](nextjs.md) · [React Native](react-native.md) · [stack map](stack-map.md).
 
 ## Contents
 1. [App structure that adapts to every platform](#1-app-structure)

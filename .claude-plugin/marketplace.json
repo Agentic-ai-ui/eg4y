@@ -8,7 +8,7 @@
     {
       "name": "apple-design-language",
       "source": "./",
-      "description": "Unofficial, HIG-researched guidelines, rules, skill, design tokens, and UI checks for designing apps across the Apple ecosystem. Created by Edison Augustin X."
+      "description": "Unofficial, HIG-researched guidelines, rules, skill, design tokens, and UI checks for designing apps across the Apple ecosystem — in SwiftUI, React, Next.js, HTML + CSS, Tailwind CSS, Vue, Svelte, or React Native. Created by Edison Augustin X."
     }
   ]
 }

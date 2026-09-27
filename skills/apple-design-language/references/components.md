@@ -3,7 +3,7 @@
 > Part of the **apple-design-language** skill — Created by Edison Augustin X.
 > Source of truth: [`GUIDELINES.md` §13–§14](../../../GUIDELINES.md#13-components) · Rules: [`rules/11-components.md`](../../../rules/11-components.md), [`rules/12-patterns.md`](../../../rules/12-patterns.md)
 
-Use this when deciding **which** component fits a need and **how** to configure it. Navigation containers are in [`navigation.md`](navigation.md); code in [`swiftui-recipes.md`](swiftui-recipes.md).
+Use this when deciding **which** component fits a need and **how** to configure it. Navigation containers are in [`navigation.md`](navigation.md); code in [`swiftui-recipes.md`](swiftui-recipes.md), [`react-recipes.md`](react-recipes.md), [`html-css-recipes.md`](html-css-recipes.md), [`vue-svelte.md`](vue-svelte.md), and [`react-native.md`](react-native.md) — side by side in [`stack-map.md`](stack-map.md#components).
 
 ## Contents
 1. [Which component?](#1-which-component)

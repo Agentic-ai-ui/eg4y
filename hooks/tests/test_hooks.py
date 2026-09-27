@@ -278,16 +278,64 @@ class WebTests(LintCase):
         font.write_bytes(b"\x00")
         self.assertEqual({f.rule for f in hig_lint.lint_file(font, RULES, SYSTEM_HEX)}, {"TYP-04"})
 
+    def test_stk03_click_handlers_on_non_interactive_elements(self):
+        self.assertFlags("STK-03", "Card.tsx", '<div className="card" onClick={() => open(id)}>Open</div>\n')
+        self.assertFlags("STK-03", "Card.vue", '<template><span @click="open">Open</span></template>\n')
+        self.assertFlags("STK-03", "Card.svelte", '<div onclick={() => open()}>Open</div>\n')
+        self.assertFlags("STK-03", "card.html", '<div onclick="open()">Open</div>\n')
+        self.assertClean("STK-03", "Card.tsx", '<button type="button" onClick={() => open(id)}>Open</button>\n')
+        self.assertClean("STK-03", "Row.tsx", '<div role="button" tabIndex={0} onClick={open} onKeyDown={key}>Open</div>\n')
+
+    def test_a11y03_jsx_expressions_and_icons(self):
+        self.assertClean("A11Y-03", "Nav.tsx", '<a href={s.href}><span aria-hidden="true">{s.icon}</span><span>{s.title}</span></a>\n')
+        self.assertClean("A11Y-03", "Save.tsx", '<button onClick={() => save()}>{t("save")}</button>\n')
+        self.assertFlags("A11Y-03", "Add.tsx", '<button onClick={() => add()}><PlusIcon /></button>\n')
+        self.assertFlags("A11Y-03", "Add2.tsx", '<button type="button">{icon}</button>\n')
+        self.assertFlags("A11Y-03", "Home.tsx", '<a href="/"><span aria-hidden="true">{s.icon}</span></a>\n')
+
+    def test_tailwind_rules(self):
+        self.assertFlags("COL-01", "Bar.tsx", '<div className="bg-[#0088FF] text-white">Library</div>\n')
+        self.assertFlags("TYP-02", "Bar.tsx", '<span className="text-[10px]">Library</span>\n')
+        self.assertFlags("TYP-03", "Bar.tsx", '<span className="font-light">Library</span>\n')
+        self.assertFlags("A11Y-01", "Bar.tsx", '<button aria-label="Add" className="h-8 w-8"><Plus /></button>\n')
+        self.assertClean("A11Y-01", "Bar.tsx", '<button aria-label="Add" className="size-8 min-h-control min-w-control"><Plus /></button>\n')
+        self.assertClean("TYP-02", "Bar.tsx", '<span className="text-caption2 text-[0.6875rem]">Library</span>\n')
+
+    def test_react_native_rules(self):
+        self.assertFlags("A11Y-05", "Title.tsx", '<Text allowFontScaling={false}>Title</Text>\n')
+        self.assertFlags("A11Y-05", "Title.tsx", '<Text maxFontSizeMultiplier={1}>Title</Text>\n')
+        self.assertClean("A11Y-05", "Title.tsx", '<Text maxFontSizeMultiplier={2}>Title</Text>\n')
+        self.assertFlags("COL-07", "App.tsx", 'Appearance.setColorScheme("dark");\n')
+        self.assertFlags("LAY-01", "Layout.tsx", 'const columns = Platform.isPad ? 2 : 1;\n')
+        self.assertFlags("COL-01", "styles.ts", 'const styles = StyleSheet.create({ link: { color: "#0088FF" } });\n')
+        self.assertFlags("A11Y-03", "Fab.tsx", '<Pressable onPress={add}><SymbolView name="plus" /></Pressable>\n')
+        self.assertClean("A11Y-03", "Fab.tsx", '<Pressable accessibilityLabel="Add Book" onPress={add}><SymbolView name="plus" /></Pressable>\n')
+        self.assertClean("A11Y-03", "Row.tsx", '<Pressable onPress={open}><Text>All Books</Text></Pressable>\n')
+
+    def test_nextjs_viewport_zoom_lock(self):
+        self.assertFlags("A11Y-05", "layout.tsx", 'export const viewport: Viewport = { maximumScale: 1, userScalable: false };\n')
+        self.assertClean("A11Y-05", "layout.tsx", 'export const viewport: Viewport = { viewportFit: "cover", colorScheme: "light dark" };\n')
+
+    def test_vue_and_svelte_scripts_are_checked(self):
+        self.assertFlags("LAY-01", "Shell.vue", '<script setup>\nconst ipad = /iPad/.test(navigator.userAgent)\n</script>\n')
+        self.assertFlags("TYP-02", "Tag.svelte", '<span style:font-size="9px">x</span>\n<style>span { font-size: 9px; }</style>\n')
+
+    def test_generated_token_files_are_clean(self):
+        assets = ROOT / "skills" / "apple-design-language" / "assets"
+        for name in ("tokens.css", "tokens.ts", "tailwind.css", "tokens.native.ts", "components.css"):
+            findings = hig_lint.lint_file(assets / name, RULES, SYSTEM_HEX)
+            self.assertEqual([], [(f.rule, f.line) for f in findings], name)
+
     def test_skill_code_snippets_pass_the_checker(self):
         import re
         refs = ROOT / "skills" / "apple-design-language" / "references"
         count = 0
         for md in sorted(refs.glob("*.md")):
-            for i, (lang, code) in enumerate(re.findall(r"```(swift|css|html)\n(.*?)```", md.read_text(encoding="utf-8"), re.S)):
+            for i, (lang, code) in enumerate(re.findall(r"```(swift|css|html|tsx|ts|jsx|vue|svelte)\n(.*?)```", md.read_text(encoding="utf-8"), re.S)):
                 findings = self.lint(f"{md.stem}-{i:02d}.{lang}", code)
                 self.assertEqual([], [(f.rule, f.line, f.message) for f in findings], f"{md.name} snippet {i} ({lang})")
                 count += 1
-        self.assertGreater(count, 20)
+        self.assertGreater(count, 70)
 
     def test_tokens_css_is_clean(self):
         tokens = ROOT / "skills" / "apple-design-language" / "assets" / "tokens.css"
@@ -386,6 +434,24 @@ class PromptRouterTests(unittest.TestCase):
         note = prompt_router.route("make our react web app header feel native on iPhone Safari")
         self.assertIn("web-adaptation.md", note)
 
+    def test_routes_each_stack_to_its_recipes(self):
+        cases = {
+            "Build a React tab bar that feels native on iPhone": "react-recipes.md",
+            "Next.js layout for an iPad app": "nextjs.md",
+            "Style my iOS web app with Tailwind": "tailwind.md",
+            "A Svelte settings screen for iPhone": "vue-svelte.md",
+            "Plain HTML and CSS page for iPad users": "html-css-recipes.md",
+            "Make my Expo React Native app feel native on iPhone": "react-native.md",
+        }
+        for prompt, ref in cases.items():
+            self.assertIn(ref, prompt_router.route(prompt), prompt)
+
+    def test_react_native_prompts_skip_web_references(self):
+        note = prompt_router.route("React Native settings screen for iPhone")
+        self.assertIn("react-native.md", note)
+        self.assertNotIn("web-adaptation.md", note)
+        self.assertNotIn("react-recipes.md", note)
+
     def test_ignores_unrelated_prompts(self):
         self.assertEqual("", prompt_router.route("Write a Python script that parses apple orchard CSV data"))
         self.assertEqual("", prompt_router.route("Fix the failing unit test in the billing service"))
@@ -422,6 +488,33 @@ class SessionContextTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             Path(d, "main.go").write_text("package main\n")
             self.assertEqual("", self.run_hook(Path(d)))
+
+
+class DocsTests(unittest.TestCase):
+    """Guards for the Markdown knowledge base."""
+
+    def docs(self):
+        yield from [ROOT / "README.md", ROOT / "AGENTS.md", ROOT / "GUIDELINES.md", ROOT / "CHANGELOG.md"]
+        yield from sorted((ROOT / "skills").rglob("*.md"))
+        yield from sorted((ROOT / "rules").glob("[0-9][0-9]-*.md"))
+
+    def test_cited_rule_ids_exist(self):
+        import re
+        prefixes = sorted({r["prefix"] for r in RULES.values()}, key=len, reverse=True)
+        pattern = re.compile(r"\b(?:" + "|".join(map(re.escape, prefixes)) + r")-\d{2}\b")
+        missing = []
+        for doc in self.docs():
+            for m in pattern.finditer(doc.read_text(encoding="utf-8")):
+                if m.group(0) not in RULES:
+                    missing.append(f"{doc.relative_to(ROOT)}: {m.group(0)}")
+        self.assertEqual([], missing)
+
+    def test_skill_description_fits_the_limit(self):
+        import re
+        text = (ROOT / "skills" / "apple-design-language" / "SKILL.md").read_text(encoding="utf-8")
+        description = re.search(r"^description: (.+)$", text, re.M).group(1)
+        self.assertLessEqual(len(description), 1024)  # Agent Skills limit
+        self.assertLess(len(text.splitlines()), 500)
 
 
 class ConfigTests(unittest.TestCase):

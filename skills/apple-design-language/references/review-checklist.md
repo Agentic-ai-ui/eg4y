@@ -3,7 +3,7 @@
 > Part of the **apple-design-language** skill — Created by Edison Augustin X.
 > Rules: [`rules/README.md`](../../../rules/README.md) · Machine-readable: [`rules/rules.json`](../../../rules/rules.json) · Quick checklist: [`GUIDELINES.md` §19](../../../GUIDELINES.md#19-agent-review-checklist)
 
-Use this to review a design, screenshot description, SwiftUI/UIKit/AppKit code, or web UI against the Apple design language — your own work before presenting it, or someone else’s on request.
+Use this to review a design, screenshot description, SwiftUI/UIKit/AppKit code, web UI (React, Next.js, Vue, Svelte, HTML/CSS, Tailwind), or React Native code against the Apple design language — your own work before presenting it, or someone else’s on request. The rules are the same on every stack; [`stack-map.md`](stack-map.md) shows how each is implemented.
 
 ## Contents
 1. [Review procedure](#1-review-procedure)
@@ -97,6 +97,21 @@ Use this to review a design, screenshot description, SwiftUI/UIKit/AppKit code, 
 - [ ] AI disclosed, controllable, confirmed before significant actions (AI-01 – AI-06)
 
 **Platform specifics** — apply the matching `PLT-*` rules ([`platforms.md`](platforms.md)).
+
+**Web stacks (React, Next.js, Vue, Svelte, HTML/CSS, Tailwind)** — [`web-adaptation.md`](web-adaptation.md)
+- [ ] Viewport has `viewport-fit=cover` and no `maximum-scale` / `user-scalable=no`; `color-scheme: light dark` (LAY-02, A11Y-05, COL-07)
+- [ ] Colors come from `tokens.css` / `tokens.ts` / the Tailwind theme — no hex literals; colored text sits on the page background or a list row (COL-01, COL-06)
+- [ ] One navigation list rendered as tab bar ⇄ sidebar by available width; links with `aria-current="page"` (NAV-01, NAV-06, LAY-01)
+- [ ] Native elements first: `<button>`, `<a>`, `<dialog>`, `popover`, radios, `role="switch"` checkboxes (A11Y-03, A11Y-07)
+- [ ] Icon-only controls have `aria-label`; icons are open-licensed, never SF Symbols (A11Y-03, BRD-03)
+- [ ] axe-core clean (WCAG 2.2 AA) in light, dark, Increase Contrast; Reduce Motion honored (COL-06, MOT-02)
+
+**React Native** — [`react-native.md`](react-native.md)
+- [ ] `PlatformColor` / `DynamicColorIOS` (via `tokens.native.ts`), no hex in components (COL-01, COL-02)
+- [ ] Text scales: `allowFontScaling` left on, `dynamicTypeRamp` set, no tight `maxFontSizeMultiplier` (TYP-01, A11Y-05)
+- [ ] Native tabs, stacks, `Switch`, `Alert`, `ActionSheetIOS` instead of JavaScript look-alikes (SYS-01, BRD-04)
+- [ ] `accessibilityLabel` and `role` on custom pressables; 44 pt targets with `hitSlop` where needed (A11Y-01, A11Y-03)
+- [ ] Reduce Motion read from `AccessibilityInfo`; glass only on floating controls (MOT-02, GLS-01)
 
 **Brand and legal**
 - [ ] No Apple trademarks, hardware replicas, SF Symbols in logos/icons, or imitated system UI (BRD-01 – BRD-04)

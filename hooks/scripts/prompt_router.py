@@ -28,7 +28,22 @@ APPLE_CONTEXT = re.compile(
     re.I,
 )
 
+# Stack-specific recipes come first so they survive the five-reference limit.
 TOPICS = [
+    ("react-native", r"\b(react[\s-]native|expo(?:\s+router)?)\b",
+     "react-native.md", "PlatformColor · Dynamic Type ramps · native tabs (STK-06)"),
+    ("nextjs", r"\b(next\.?js|app\s+router)\b",
+     "nextjs.md", "viewport export: viewportFit cover, no zoom lock (A11Y-05)"),
+    ("react", r"\b(react|jsx|tsx)\b(?![\s-]native)",
+     "react-recipes.md", "native elements (STK-03) · tokens.css + components.css"),
+    ("tailwind", r"\btailwind(?:\s?css)?\b",
+     "tailwind.md", "generated theme: bg-background, text-accent-text, min-h-control"),
+    ("vue-svelte", r"\b(vue(?:\.?js)?|nuxt|svelte(?:kit)?)\b",
+     "vue-svelte.md", "same components.css classes as React and HTML"),
+    ("html-css", r"\b(html|css|vanilla\s+(?:js|javascript)|plain\s+web)\b",
+     "html-css-recipes.md", "<dialog>, popover, container queries"),
+    ("web", r"\b(react(?![\s-]native)|next\.?js|vue|svelte|tailwind|css|html|web\s?app|website|web\s+page|safari|pwa|browser)\b",
+     "web-adaptation.md", "WCAG 2.2 AA (STK-04) · no SF Symbols on the web (STK-02)"),
     ("platforms", r"\b(ipad|mac|macos|watch|watchos|tvos|apple\s+tv|visionos|vision\s+pro|iphone\s+duo|multi-?platform|cross-?platform|every\s+(?:apple\s+)?device|all\s+(?:apple\s+)?devices)\b",
      "platforms.md", "container per platform and what stays identical (SYNC-01 – SYNC-07)"),
     ("navigation", r"\b(tab\s?bar|tabview|sidebar|split\s?view|navigation(?:\s?bar|stack|splitview)?|toolbar|search(?:\s?(?:bar|field|tab))?)\b",
@@ -45,8 +60,6 @@ TOPICS = [
      "writing.md", "WRT-01 verb labels · WRT-07 helpful errors"),
     ("swiftui", r"\b(swiftui|swift\s?ui)\b",
      "swiftui-recipes.md", "anti-pattern → fix table"),
-    ("web", r"\b(css|html|react|next\.?js|vue|svelte|web\s?app|website|web\s+page|safari|pwa|tailwind)\b",
-     "web-adaptation.md", "TYP-04 never bundle SF fonts · A11Y-05 keep zoom"),
     ("review", r"\b(review|audit|critique|check\s+(?:my|this|the)|feedback\s+on)\b",
      "review-checklist.md", "report template; errors first"),
 ]
@@ -63,7 +76,7 @@ def route(prompt: str) -> str:
         picks.append(("platforms", "platforms.md", "start with the platform playbook"))
     lines = ["Apple Design Language: this request involves Apple-platform UI. Use the apple-design-language skill "
              f"({PACKAGE_ROOT / 'skills' / 'apple-design-language' / 'SKILL.md'}) and read only these references:"]
-    for _, ref, hint in picks[:5]:
+    for _, ref, hint in picks[:6]:
         lines.append(f"- {REFS / ref} — {hint}")
     lines.append("Cite rule IDs for non-obvious decisions; research Apple’s docs before asserting anything not in the package.")
     return "\n".join(lines)

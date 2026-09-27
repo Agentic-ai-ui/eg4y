@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
-"""Validate assets/tokens.json and generate assets/tokens.css + references/design-tokens.md.
+"""Validate assets/tokens.json and generate the per-stack token files and references/design-tokens.md.
 
 Part of the Apple Design Language skill — Created by Edison Augustin X.
 
 tokens.json is the single source of truth for every value in this skill. Values come from
-Apple's Human Interface Guidelines; this script keeps the CSS and Markdown renderings in sync.
+Apple's Human Interface Guidelines; this script keeps every rendering in sync:
+
+    assets/tokens.css         CSS custom properties (HTML + CSS, React, Next.js, Vue, Svelte)
+    assets/tokens.ts          typed values and CSS-variable references for JS/TS frameworks
+    assets/tailwind.css       Tailwind CSS v4 theme mapped onto tokens.css
+    assets/tokens.native.ts   React Native: PlatformColor on iOS, Dynamic Type ramps
+    references/design-tokens.md
 
 Usage:
     python3 scripts/build_tokens.py          # validate and regenerate
@@ -21,6 +27,9 @@ from pathlib import Path
 SKILL = Path(__file__).resolve().parent.parent
 TOKENS = SKILL / "assets" / "tokens.json"
 CSS_OUT = SKILL / "assets" / "tokens.css"
+TS_OUT = SKILL / "assets" / "tokens.ts"
+TAILWIND_OUT = SKILL / "assets" / "tailwind.css"
+NATIVE_OUT = SKILL / "assets" / "tokens.native.ts"
 MD_OUT = SKILL / "references" / "design-tokens.md"
 
 HEX = re.compile(r"^#[0-9A-F]{6}$")
@@ -145,8 +154,18 @@ def render_css(t: dict) -> str:
     L.append("  --adl-destructive: var(--adl-red);")
     L.append("  --adl-background: Canvas;")
     L.append("  --adl-label: CanvasText;")
-    L.append("  --adl-background-grouped: var(--adl-system-gray6);")
+    L.append("  --adl-background-grouped: var(--adl-system-gray6);      /* inset-grouped page */")
+    L.append("  --adl-background-grouped-row: var(--adl-background);    /* rows on a grouped page */")
     L.append("  --adl-separator: var(--adl-system-gray4);")
+    L.append("  /* Project values mixed from the tokens above (NOT Apple values): */")
+    L.append("  --adl-secondary-label: color-mix(in srgb, CanvasText 62%, Canvas); /* ≥ 4.5:1 on background and grouped rows */")
+    L.append("  --adl-fill: color-mix(in srgb, var(--adl-system-gray) 18%, transparent); /* control and field fills */")
+    L.append("  --adl-on-accent: white;  /* label on --adl-accent-fill */")
+    L.append("  /* Text and fill variants chosen so web text meets WCAG 2.2 AA (4.5:1), which is stricter than the")
+    L.append("     HIG's 3:1 for bold text. They use HIG increased-contrast variants where the default fails. */")
+    L.append(f"  --adl-accent-text: {sysc['blue']['lightIncreasedContrast']};      /* {contrast_ratio(sysc['blue']['lightIncreasedContrast'], '#FFFFFF'):.2f}:1 on white */")
+    L.append(f"  --adl-destructive-text: {sysc['red']['lightIncreasedContrast']}; /* {contrast_ratio(sysc['red']['lightIncreasedContrast'], '#FFFFFF'):.2f}:1 on white */")
+    L.append(f"  --adl-accent-fill: {sysc['blue']['lightIncreasedContrast']};      /* white label: {contrast_ratio('#FFFFFF', sysc['blue']['lightIncreasedContrast']):.2f}:1 in every appearance */")
     L.append("")
     L.append("  /* Typography — system font stacks (never bundle Apple system fonts; TYP-04) */")
     L.append("  --adl-font-text: -apple-system, system-ui, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;")
@@ -185,6 +204,10 @@ def render_css(t: dict) -> str:
     L.append("@media (prefers-color-scheme: dark) {")
     L.append("  :root {")
     L += ["  " + line for line in color_block("dark")]
+    L.append("    --adl-background-grouped: var(--adl-background);")
+    L.append("    --adl-background-grouped-row: var(--adl-system-gray6);")
+    L.append(f"    --adl-accent-text: {sysc['blue']['dark']};")
+    L.append(f"    --adl-destructive-text: {sysc['red']['dark']};")
     L.append("    --adl-glass-fill: rgb(30 30 30 / 0.6);")
     L.append("    --adl-glass-stroke: rgb(255 255 255 / 0.12);")
     L.append("  }")
@@ -194,11 +217,15 @@ def render_css(t: dict) -> str:
     L.append("@media (prefers-contrast: more) {")
     L.append("  :root {")
     L += ["  " + line for line in color_block("lightIncreasedContrast")]
+    L.append("    --adl-secondary-label: color-mix(in srgb, CanvasText 80%, Canvas);")
+    L.append("    --adl-separator: var(--adl-system-gray);")
     L.append("  }")
     L.append("}")
     L.append("@media (prefers-contrast: more) and (prefers-color-scheme: dark) {")
     L.append("  :root {")
     L += ["  " + line for line in color_block("darkIncreasedContrast")]
+    L.append(f"    --adl-accent-text: {sysc['blue']['darkIncreasedContrast']};")
+    L.append(f"    --adl-destructive-text: {sysc['red']['darkIncreasedContrast']};")
     L.append("  }")
     L.append("}")
     L.append("")
@@ -229,6 +256,14 @@ def render_css(t: dict) -> str:
     L.append("}")
     L.append("/* The 44 pt touch default applies everywhere: hybrid devices (iPad + trackpad) report fine pointers too. */")
     L.append("")
+    L.append("/* Hidden visually, still read by VoiceOver (labels for icon-only controls, A11Y-03) */")
+    L.append(".adl-visually-hidden {")
+    L.append("  position: absolute !important;")
+    L.append("  width: 1px; height: 1px;")
+    L.append("  margin: -1px; padding: 0; border: 0;")
+    L.append("  overflow: hidden; clip-path: inset(50%); white-space: nowrap;")
+    L.append("}")
+    L.append("")
     L.append("/* Visible keyboard focus (A11Y-07) */")
     L.append(":focus-visible { outline: 3px solid var(--adl-accent); outline-offset: 2px; }")
     L.append("")
@@ -253,6 +288,220 @@ def render_css(t: dict) -> str:
     L.append("  *, *::before, *::after { scroll-behavior: auto !important; }")
     L.append("}")
     L.append("")
+    return "\n".join(L)
+
+
+# ---------------------------------------------------------------------------- JS / TS, Tailwind, React Native
+
+# Semantic roles defined in tokens.css (web adaptation; see render_css).
+SEMANTIC_ROLES = ["accent", "destructive", "background", "label", "secondaryLabel", "backgroundGrouped",
+                  "backgroundGroupedRow", "separator", "fill", "onAccent", "accentText", "destructiveText", "accentFill"]
+# React Native dynamicTypeRamp values (https://reactnative.dev/docs/text#dynamictyperamp-ios)
+RN_RAMP = {
+    "large-title": "largeTitle", "title1": "title1", "title2": "title2", "title3": "title3", "headline": "headline",
+    "body": "body", "callout": "callout", "subheadline": "subheadline", "footnote": "footnote",
+    "caption1": "caption1", "caption2": "caption2",
+}
+# UIKit UI element colors exposed through React Native PlatformColor (iOS only). Apple publishes no values for
+# these, so other platforms fall back to published system grays, black, or white (project fallbacks, NOT Apple's
+# values for the semantic colors). Each fallback: (UIKit name, light source, dark source).
+RN_SEMANTIC = {
+    "label": ("label", "#000000", "#FFFFFF"),
+    "secondaryLabel": ("secondaryLabel", "gray.systemGray", "gray.systemGray"),
+    "background": ("systemBackground", "#FFFFFF", "#000000"),
+    "secondaryBackground": ("secondarySystemBackground", "gray.systemGray6", "gray.systemGray6"),
+    "groupedBackground": ("systemGroupedBackground", "gray.systemGray6", "#000000"),
+    "separator": ("separator", "gray.systemGray4", "gray.systemGray4"),
+    "link": ("link", "system.blue", "system.blue"),
+}
+
+
+def camel(slug: str) -> str:
+    return re.sub(r"-(\w)", lambda m: m.group(1).upper(), slug)
+
+
+def generated_header(t: dict, comment: str, lines: list[str]) -> list[str]:
+    head = [
+        "Apple Design Language — " + lines[0],
+        "Created by Edison Augustin X.",
+        "",
+        "GENERATED by skills/apple-design-language/scripts/build_tokens.py from assets/tokens.json.",
+        f"Do not edit by hand. Values: {t['$meta']['verifiedAgainst']}.",
+        *lines[1:],
+    ]
+    if comment == "//":
+        return [("// " + x).rstrip() for x in head]
+    return ["/*"] + [(" * " + x).rstrip() for x in head] + [" */"]
+
+
+def ios_large(t: dict) -> dict:
+    return {TEXT_STYLE_SLUG[s["style"]]: s for s in t["typography"]["textStyles"]["ios"]["sizes"]["Large (default)"]}
+
+
+def render_ts(t: dict) -> str:
+    sysc, gray = t["color"]["system"], t["color"]["gray"]
+    names = list(sysc) + list(gray)
+    L = generated_header(t, "//", [
+        "tokens for JavaScript and TypeScript (React, Next.js, Vue, Svelte, plain JS)",
+        "",
+        "Import tokens.css once; then use `color`, `text`, … in inline styles or CSS-in-JS. They are CSS variable",
+        "references, so light, dark, and Increase Contrast switch automatically (COL-01, COL-02, COL-07).",
+        "Use `resolveSystemColor` only where CSS variables can't reach (canvas, WebGL, generated images).",
+    ])
+    L += ["", "export type ColorVariants = {", "  light: string;", "  dark: string;", "  lightIncreasedContrast: string;", "  darkIncreasedContrast: string;", "};", ""]
+    L.append("export const systemColorNames = [" + ", ".join(f'"{n}"' for n in names) + "] as const;")
+    L.append("export type SystemColorName = (typeof systemColorNames)[number];")
+    L += ["", "/** HIG system color values: light, dark, and increased-contrast variants. */", "export const systemColors: Record<SystemColorName, ColorVariants> = {"]
+    for k, v in {**sysc, **gray}.items():
+        L.append(f'  {k}: {{ light: "{v["light"]}", dark: "{v["dark"]}", lightIncreasedContrast: "{v["lightIncreasedContrast"]}", darkIncreasedContrast: "{v["darkIncreasedContrast"]}" }},')
+    L += ["};", ""]
+    L.append("/** CSS variable references from tokens.css — they follow the system appearance and contrast settings. */")
+    L.append("export const color = {")
+    for n in names + SEMANTIC_ROLES:
+        L.append(f'  {n}: "var({css_var(n)})",')
+    L += ["} as const;", "export type ColorToken = keyof typeof color;", ""]
+    L += ["/** System font stacks. Never bundle Apple system fonts (TYP-04). */", "export const font = {"]
+    for n in ("text", "rounded", "serif", "mono"):
+        L.append(f'  {n}: "var(--adl-font-{n})",')
+    L += ["} as const;", ""]
+    large = ios_large(t)
+    L.append("/** iOS text styles at the Large (default) Dynamic Type size, as style objects (rem-based, so they scale). */")
+    L.append("export const text = {")
+    for slug in large:
+        L.append(f'  {camel(slug)}: {{ fontSize: "var(--adl-text-{slug}-size)", lineHeight: "var(--adl-text-{slug}-line-height)", fontWeight: "var(--adl-text-{slug}-weight)" }},')
+    L += ["} as const;", "export type TextStyle = keyof typeof text;", ""]
+    L.append("/** The same text styles in points (1 CSS px ≈ 1 pt on Apple devices at default zoom). */")
+    L.append("export const textStylePoints: Record<TextStyle, { size: number; leading: number; weight: number; emphasizedWeight: number }> = {")
+    for slug, s in large.items():
+        L.append(f"  {camel(slug)}: {{ size: {s['size']}, leading: {s['leading']}, weight: {WEIGHT[s['weight']]}, emphasizedWeight: {WEIGHT[s['emphasized']]} }},")
+    L += ["};", ""]
+    L.append("/** Default and minimum text sizes per platform, in points (TYP-02). */")
+    L.append("export const textSize = {")
+    for p, v in t["typography"]["platformSizes"].items():
+        L.append(f"  {p}: {{ default: {v['default']}, minimum: {v['minimum']} }},")
+    L += ["} as const;", ""]
+    L.append("/** Hit targets per platform, in points (A11Y-01). Web default: 44 px everywhere. */")
+    L.append("export const hitTarget = {")
+    for p, v in t["accessibility"]["controlSize"].items():
+        L.append(f"  {p}: {{ default: {v['default']}, minimum: {v['minimum']} }},")
+    L += ["} as const;", ""]
+    L += [
+        "/** Layout variables from tokens.css. */",
+        "export const layout = {",
+        '  controlSize: "var(--adl-control-size)",',
+        '  safeTop: "var(--adl-safe-top)",',
+        '  safeRight: "var(--adl-safe-right)",',
+        '  safeBottom: "var(--adl-safe-bottom)",',
+        '  safeLeft: "var(--adl-safe-left)",',
+        "} as const;",
+        "",
+        "/** Motion variables from tokens.css (1 ms under Reduce Motion — MOT-02). Project defaults, not Apple values. */",
+        "export const motion = {",
+        '  duration: "var(--adl-motion-duration)",',
+        '  easing: "var(--adl-motion-easing)",',
+        "} as const;",
+        "",
+        "/** Hex value of a system color for an appearance — for canvas, WebGL, and image generation only. */",
+        "export function resolveSystemColor(",
+        "  name: SystemColorName,",
+        "  options: { dark?: boolean; increasedContrast?: boolean } = {},",
+        "): string {",
+        "  const c = systemColors[name];",
+        "  if (options.increasedContrast) return options.dark ? c.darkIncreasedContrast : c.lightIncreasedContrast;",
+        "  return options.dark ? c.dark : c.light;",
+        "}",
+        "",
+    ]
+    return "\n".join(L)
+
+
+def render_tailwind(t: dict) -> str:
+    sysc, gray = t["color"]["system"], t["color"]["gray"]
+    L = generated_header(t, "/*", [
+        "Tailwind CSS v4 theme",
+        "",
+        "Usage (Tailwind v4):   @import \"tailwindcss\";   @import \"./tailwind.css\";",
+        "Keep tokens.css next to this file. Utilities such as bg-background, text-label, text-blue, text-body,",
+        "font-rounded, and min-h-control read tokens.css variables, so they follow light, dark, and Increase",
+        "Contrast automatically — no dark: or contrast-more: variants needed for these colors.",
+        "`inline` is required because the theme variables reference other variables (tailwindcss.com/docs/theme).",
+    ])
+    L += ["", '@import "./tokens.css" layer(base);', "", "@theme inline {", "  /* System colors (HIG) and semantic roles */"]
+    for n in list(sysc) + list(gray) + SEMANTIC_ROLES:
+        L.append(f"  --color-{css_var(n)[6:]}: var({css_var(n)});")
+    L += ["", "  /* System font stacks — never bundle Apple system fonts (TYP-04) */"]
+    L.append("  --font-sans: var(--adl-font-text);")
+    for n in ("rounded", "serif", "mono"):
+        L.append(f"  --font-{n}: var(--adl-font-{n});")
+    L += ["", "  /* iOS text styles, Large (default) Dynamic Type size */"]
+    for slug in ios_large(t):
+        L.append(f"  --text-{slug}: var(--adl-text-{slug}-size);")
+        L.append(f"  --text-{slug}--line-height: var(--adl-text-{slug}-line-height);")
+        L.append(f"  --text-{slug}--font-weight: var(--adl-text-{slug}-weight);")
+    L += ["", "  /* Hit targets (A11Y-01): min-h-control, min-w-control, size-control */", "  --spacing-control: var(--adl-control-size);", "}", ""]
+    return "\n".join(L)
+
+
+def render_native(t: dict) -> str:
+    sysc, gray = t["color"]["system"], t["color"]["gray"]
+    names = list(sysc) + list(gray)
+    L = generated_header(t, "//", [
+        "tokens for React Native",
+        "",
+        "On iOS, colors are PlatformColor references to UIKit system colors: they adapt to light, dark, and",
+        "Increase Contrast natively, like a SwiftUI or UIKit app (COL-01, COL-02). Elsewhere (Android, web) the",
+        "system palette falls back to the HIG hex values for the current color scheme; semantic fallbacks are",
+        "neutral project values, NOT Apple values. Text styles follow iOS Dynamic Type via dynamicTypeRamp.",
+    ])
+    L += ["", 'import { Platform, PlatformColor, useColorScheme, type ColorValue, type TextProps, type TextStyle } from "react-native";', ""]
+    L.append("const palette = {")
+    for k, v in {**sysc, **gray}.items():
+        uikit = v["api"]["uikit"].split(".")[-1]
+        L.append(f'  {k}: {{ ios: "{uikit}", light: "{v["light"]}", dark: "{v["dark"]}" }},')
+    def fallback(src: str, variant: str) -> str:
+        if src.startswith("#"):
+            return src
+        group, key = src.split(".")
+        return t["color"][group][key][variant]
+
+    for k, (ios, light, dark) in RN_SEMANTIC.items():
+        L.append(f'  {k}: {{ ios: "{ios}", light: "{fallback(light, "light")}", dark: "{fallback(dark, "dark")}" }},')
+    L += ["} as const;", "", "export type NativeColorName = keyof typeof palette;", ""]
+    L += [
+        "/** A system color: PlatformColor on iOS, the light or dark fallback elsewhere. */",
+        "export function systemColor(name: NativeColorName, scheme: \"light\" | \"dark\" = \"light\"): ColorValue {",
+        "  const c = palette[name];",
+        "  return Platform.OS === \"ios\" ? PlatformColor(c.ios) : c[scheme];",
+        "}",
+        "",
+        "/** Every system color for the current appearance. On iOS the values adapt natively without re-rendering. */",
+        "export function useSystemColors(): Record<NativeColorName, ColorValue> {",
+        "  const scheme = useColorScheme() === \"dark\" ? \"dark\" : \"light\";",
+        "  const out = {} as Record<NativeColorName, ColorValue>;",
+        "  for (const name of Object.keys(palette) as NativeColorName[]) out[name] = systemColor(name, scheme);",
+        "  return out;",
+        "}",
+        "",
+    ]
+    large = ios_large(t)
+    L.append("/** iOS text styles (Large default size). Keep allowFontScaling on (the default) so Dynamic Type applies (TYP-01). */")
+    L.append("export const textStyles = {")
+    for slug, s in large.items():
+        L.append(f'  {camel(slug)}: {{ fontSize: {s["size"]}, lineHeight: {s["leading"]}, fontWeight: "{WEIGHT[s["weight"]]}" }},')
+    L += ["} satisfies Record<string, TextStyle>;", "", "export type TextStyleName = keyof typeof textStyles;", ""]
+    L.append("/** The matching iOS Dynamic Type ramp for each text style — pass it as <Text dynamicTypeRamp={…}>. */")
+    L.append("export const dynamicTypeRamp = {")
+    for slug in large:
+        L.append(f'  {camel(slug)}: "{RN_RAMP[slug]}",')
+    L += ['} as const satisfies Record<TextStyleName, NonNullable<TextProps["dynamicTypeRamp"]>>;', ""]
+    ctl = t["accessibility"]["controlSize"]
+    L += [
+        f"/** Minimum hit target in points (A11Y-01): {ctl['ios']['default']} on iPhone and iPad; use hitSlop to reach it around small visuals. */",
+        f"export const minimumHitTarget = {ctl['ios']['default']};",
+        f"/** Minimum text size on iOS, in points (TYP-02). */",
+        f"export const minimumTextSize = {t['typography']['platformSizes']['ios']['minimum']};",
+        "",
+    ]
     return "\n".join(L)
 
 
@@ -285,7 +534,7 @@ def render_md(t: dict) -> str:
         f"> Verified against: {m['verifiedAgainst']}.",
         "",
         "**How to use these values:** in native apps, use the system API column — never hard-code these values (COL-01, TYP-01). "
-        "Use the numbers for mockups, validation, reviews, and web adaptation ([`../assets/tokens.css`](../assets/tokens.css)).",
+        "Use the numbers for mockups, validation, and reviews. Code gets them generated: [`tokens.css`](../assets/tokens.css) (web), [`tokens.ts`](../assets/tokens.ts) (JavaScript/TypeScript), [`tailwind.css`](../assets/tailwind.css) (Tailwind v4), and [`tokens.native.ts`](../assets/tokens.native.ts) (React Native) — see [`stack-map.md`](stack-map.md).",
         "",
         "## Contents",
         "1. [System colors](#system-colors)",
@@ -411,7 +660,13 @@ def main() -> int:
             print(f"  - {e}", file=sys.stderr)
         return 1
 
-    outputs = {CSS_OUT: render_css(tokens), MD_OUT: render_md(tokens)}
+    outputs = {
+        CSS_OUT: render_css(tokens),
+        TS_OUT: render_ts(tokens),
+        TAILWIND_OUT: render_tailwind(tokens),
+        NATIVE_OUT: render_native(tokens),
+        MD_OUT: render_md(tokens),
+    }
     if args.check:
         stale = [p.name for p, text in outputs.items() if not p.exists() or p.read_text(encoding="utf-8") != text]
         if stale:
@@ -421,7 +676,7 @@ def main() -> int:
         return 0
     for path, text in outputs.items():
         path.write_text(text, encoding="utf-8")
-    print(f"✓ tokens valid; wrote {CSS_OUT.relative_to(SKILL)} and {MD_OUT.relative_to(SKILL)}")
+    print("✓ tokens valid; wrote " + ", ".join(str(p.relative_to(SKILL)) for p in outputs))
     return 0
 
 

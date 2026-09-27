@@ -3,7 +3,7 @@
 > **Created by Edison Augustin X.** · GENERATED from [`../assets/tokens.json`](../assets/tokens.json) by `scripts/build_tokens.py` — do not edit by hand.
 > Verified against: Apple Human Interface Guidelines, content current through September 2026.
 
-**How to use these values:** in native apps, use the system API column — never hard-code these values (COL-01, TYP-01). Use the numbers for mockups, validation, reviews, and web adaptation ([`../assets/tokens.css`](../assets/tokens.css)).
+**How to use these values:** in native apps, use the system API column — never hard-code these values (COL-01, TYP-01). Use the numbers for mockups, validation, and reviews. Code gets them generated: [`tokens.css`](../assets/tokens.css) (web), [`tokens.ts`](../assets/tokens.ts) (JavaScript/TypeScript), [`tailwind.css`](../assets/tailwind.css) (Tailwind v4), and [`tokens.native.ts`](../assets/tokens.native.ts) (React Native) — see [`stack-map.md`](stack-map.md).
 
 ## Contents
 1. [System colors](#system-colors)

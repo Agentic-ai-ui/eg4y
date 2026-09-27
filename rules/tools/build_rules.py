@@ -63,6 +63,7 @@ PREFIXES = {
     "PLT-VIS": "Platform: visionOS",
     "PLT-WATCH": "Platform: watchOS",
     "BRD": "Brand and legal",
+    "STK": "Implementation stacks",
 }
 ID_RE = re.compile(r"^(?P<prefix>" + "|".join(sorted(map(re.escape, PREFIXES), key=len, reverse=True)) + r")-(?P<num>\d{2})$")
 HEADING_RE = re.compile(r"^### (?P<id>\S+) · (?P<title>.+?)\s*$")

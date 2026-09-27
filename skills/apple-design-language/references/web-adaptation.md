@@ -1,9 +1,25 @@
-# Web adaptation: web apps that feel at home on Apple devices
+# Web foundations: the Apple Design Language on the web
 
 > Part of the **apple-design-language** skill — Created by Edison Augustin X.
-> Tokens: [`../assets/tokens.css`](../assets/tokens.css) (generated from `tokens.json`) · Rules still apply: TYP-04, A11Y-01/03/04/05, MOT-02, COL-01/03/06, BRD-*
+> Assets: [`tokens.css`](../assets/tokens.css) (generated) · [`components.css`](../assets/components.css) · [`tokens.ts`](../assets/tokens.ts) · [`tailwind.css`](../assets/tailwind.css) · Rules still apply: TYP-04, A11Y-01/03/04/05, MOT-02, COL-01/03/06, BRD-*
 
-The HIG targets native apps. When the deliverable is a **website or web app** used on iPhone, iPad, Mac, or Vision Pro, apply the same principles — hierarchy, legibility, system typography, semantic color, accessibility, restraint — through web standards. Don’t imitate native chrome pixel-for-pixel (BRD-04); don’t claim a web page *is* Liquid Glass.
+The HIG targets native apps. When the deliverable is a **website or web app** used on iPhone, iPad, Mac, or Vision Pro, apply the same principles — hierarchy, legibility, system typography, semantic color, accessibility, restraint — through web standards. This page is the foundation every web stack shares; the stack pages add verified component code:
+
+| Stack | Read |
+|---|---|
+| React (primary web stack) | [`react-recipes.md`](react-recipes.md) |
+| Next.js | [`nextjs.md`](nextjs.md) + the React recipes |
+| Plain HTML + CSS | [`html-css-recipes.md`](html-css-recipes.md) |
+| Tailwind CSS | [`tailwind.md`](tailwind.md) |
+| Vue, Svelte | [`vue-svelte.md`](vue-svelte.md) |
+| React Native (native iOS views from JavaScript) | [`react-native.md`](react-native.md) |
+| Side-by-side equivalents, including SwiftUI | [`stack-map.md`](stack-map.md) |
+
+All web stacks share `tokens.css` and `components.css`, so a React, Vue, Svelte, or plain-HTML build of the same screen looks and behaves the same (SYNC-01). Don’t imitate native chrome pixel-for-pixel (BRD-04); don’t claim a web page *is* Liquid Glass.
+
+**Contrast baseline.** Web recipes meet WCAG 2.2 AA as well as the HIG. WCAG is stricter for bold text below 18.66 px (4.5:1 where the HIG allows 3:1), so `tokens.css` provides `--adl-accent-text`, `--adl-destructive-text`, and `--adl-accent-fill`, which use the HIG’s increased-contrast variants where the default colors fall short. No HIG blue or red reaches 4.5:1 on gray fills in light mode: put colored text on the page background or a list row.
+
+**Icons.** SF Symbols are licensed “solely for the purpose of developing Applications for Apple-branded products that run on the system for which the image was provided” (Xcode and Apple SDKs Agreement §2.10, with “Application” defined in §1 as software for Apple-branded products running Apple’s operating systems). A web page isn’t such an Application, so web builds use an open-licensed set — Lucide (ISC), Phosphor (MIT), Heroicons (MIT), or Material Symbols (Apache 2.0) — marked `aria-hidden` next to a text label (BRD-03).
 
 ## Contents
 1. [Principles for the web](#1-principles-for-the-web)
@@ -53,6 +69,18 @@ Source: MDN browser-compat-data **8.1.3** (Safari = macOS, iOS = Safari on iOS/i
 | `:focus-visible` | 15.4 | 15.4 | 86 | 85 | ✅ |
 | `forced-colors` | 16 | 16 | 89 | 89 | ✅ |
 | `-webkit-text-size-adjust` | — | prefixed | 54 | No | Set to `100%` |
+| `<dialog>` + `showModal()` | 15.4 | 15.4 | 37 | 98 | ✅ sheets and alerts |
+| `inert` | 15.5 | 15.5 | 102 | 112 | ✅ |
+| `:has()` | 15.4 | 15.4 | 105 | 121 | ✅ |
+| Container queries | 16 | 16 | 105 | 110 | ✅ tab bar ⇄ sidebar |
+| `color-mix()` | 16.2 | 16.2 | 111 | 113 | ✅ |
+| `popover` attribute | 17 | 17 | 114 | 125 | ✅ menus |
+| `<search>` | 17 | 17 | 118 | 118 | ✅ |
+| `@starting-style` | 17.5 | 17.5 | 117 | 129 | Progressive (entrance animation) |
+| Anchor positioning (`anchor-name`, `position-area`) | 26 | 26 | 125 | 147 | Progressive (centered fallback) |
+| Invoker commands (`command`, `commandfor`) | 26.2 | 26.2 | 135 | 144 | Progressive (script fallback) |
+| `closedby` on `<dialog>` | Preview | No | 134 | 141 | ⚠️ Not on iOS yet |
+| `switch` attribute on checkboxes | 17.4 | 17.4 | No | No | Add `role="switch"` too |
 
 WebKit Dynamic Type font keywords (`font: -apple-system-body`, `-apple-system-headline`, `-apple-system-subheadline`, `-apple-system-caption1`, `-apple-system-caption2`, `-apple-system-footnote`, and short/tall variants) are documented by WebKit ([Using the System Font in Web Content](https://webkit.org/blog/3709/using-the-system-font-in-web-content/)); they are nonstandard and absent from MDN’s dataset. Other browsers ignore them, so always declare a fallback first.
 
@@ -62,10 +90,13 @@ WebKit Dynamic Type font keywords (`font: -apple-system-body`, `-apple-system-he
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">   <!-- optional: the shared components -->
 ```
 
 - **Never** add `user-scalable=no` or `maximum-scale=1` — it blocks zoom (A11Y-05).
-- `tokens.css` defines `--adl-*` variables, base styles, `.adl-text-*` text styles, `.adl-control`, `.adl-glass`, focus and motion handling. Tested in Chromium: colors switch for dark, increased contrast, and both combined; body text computes to 17 px / 22 px; controls to 44 px minimum.
+- `tokens.css` defines `--adl-*` variables, base styles, `.adl-text-*` text styles, `.adl-control`, `.adl-glass`, `.adl-visually-hidden`, focus and motion handling. Tested in Chromium: colors switch for dark, increased contrast, and both combined; body text computes to 17 px / 22 px; controls to 44 px minimum.
+- `components.css` (hand-written) styles the app shell, tab bar ⇄ sidebar, toolbar, buttons, inset grouped lists, switch, segmented control, fields, sheets, alerts, and menus with `adl-*` classes — see [`html-css-recipes.md`](html-css-recipes.md#2-class-reference).
+- JavaScript frameworks can import the same values from `tokens.ts` (CSS-variable references plus typed point values); Tailwind v4 projects import `tailwind.css`.
 
 ## 4. Typography and Dynamic Type
 
@@ -93,7 +124,7 @@ body { font-family: var(--adl-font-text); font-size: var(--adl-text-body-size); 
 ```
 
 - `tokens.css` switches all 12 system colors and 6 grays between the HIG’s light, dark, and increased-contrast values automatically.
-- Semantic web roles (`--adl-background` = `Canvas`, `--adl-label` = `CanvasText`) use CSS system colors. Apple doesn’t publish values for native semantic colors like `label` or `systemBackground`, so don’t hard-code guesses of them.
+- Semantic web roles (`--adl-background` = `Canvas`, `--adl-label` = `CanvasText`) use CSS system colors. Apple doesn’t publish values for native semantic colors like `label` or `systemBackground`, so don’t hard-code guesses of them. The other roles — `--adl-secondary-label`, `--adl-fill`, `--adl-background-grouped(-row)`, `--adl-separator`, `--adl-accent-text`, `--adl-destructive-text`, `--adl-accent-fill`, `--adl-on-accent` — are project values mixed from system colors, documented in `tokens.css`.
 - **Check contrast** (computed in [`design-tokens.md`](design-tokens.md#contrast-of-system-colors)): in light mode, only indigo reaches 4.5:1 as text on white — blue is 3.52:1 and yellow 1.51:1. All increased-contrast variants reach ≥ 4.5:1, and every dark-mode value passes on black. For small text, use the label color or an increased-contrast variant; use vivid colors for fills, icons, and large or bold text (≥ 3:1) (COL-06, COL-03).
 
 ## 6. Layout, safe areas, touch targets
@@ -151,5 +182,7 @@ Real Liquid Glass (refraction, specular highlights, adaptive tinting) is native-
 | Recreate iOS status bars, home indicators, or system alerts in HTML | Imitates system UI; confuses people | BRD-04 |
 | Show Apple device frames or Apple logos as decoration | Trademark and hardware-replica restrictions | BRD-01, BRD-02 |
 | Use SF Symbols artwork as your logo or app icon | SF Symbols license prohibits it | BRD-03 |
+| Export SF Symbols as SVGs for a web page | Licensed only for apps on Apple platforms (Xcode and Apple SDKs Agreement §2.10) | BRD-03 |
+| Blue or red text on gray fills | Below 4.5:1 in light mode | COL-06 |
 | Hard-code dark text on a custom dark background “because Safari” | Breaks appearance switching | COL-07 |
 | Fixed `px` font sizes and disabled zoom | Blocks text enlargement | A11Y-05, TYP-01 |

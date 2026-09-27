@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """hig_lint — check UI source files against the Apple Design Language rules marked `Check: hook`.
 
+Covers Swift; CSS/SCSS; HTML; JavaScript/TypeScript and JSX/TSX (React, Next.js, React Native);
+Vue, Svelte, and Astro components; Tailwind classes; plists, .strings, and font files.
+
 Part of the Apple Design Language package — Created by Edison Augustin X.
 
 Rule metadata (title, level, severity) comes from rules/rules.json, so this script and the
@@ -47,6 +50,7 @@ HOOK_OUTPUT_LIMIT = 9500  # Claude Code caps hook context strings at 10,000 char
 SWIFT_EXT = {".swift"}
 STYLE_EXT = {".css", ".scss", ".sass", ".less"}
 MARKUP_EXT = {".html", ".htm", ".vue", ".svelte", ".astro"}
+COMPONENT_EXT = {".vue", ".svelte", ".astro"}
 SCRIPT_EXT = {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}
 PLIST_EXT = {".plist"}
 STRINGS_EXT = {".strings", ".xcstrings"}
@@ -441,12 +445,28 @@ def markup_detectors(src: Source, system_hex: dict[str, str]) -> Iterable[Findin
     for m in re.finditer(r"<style[^>]*>(.*?)</style>", text, re.I | re.S):
         yield from style_detectors(src, m.group(1), m.start(1), system_hex)
 
+    if src.path.suffix.lower() in COMPONENT_EXT:
+        yield from js_detectors(src, p, text, system_hex)
     yield from shared_markup_and_script(src, p, text)
 
 
 def script_detectors(src: Source, system_hex: dict[str, str]) -> Iterable[Finding]:
     p = str(src.path)
     text = src.text
+    yield from js_detectors(src, p, text, system_hex)
+
+    if src.path.suffix.lower() in {".jsx", ".tsx"}:
+        yield from shared_markup_and_script(src, p, text)
+    else:
+        yield from click_here(src, p)
+
+
+TOKEN_FILES = {"tokens.css", "tokens.ts", "tokens.native.ts", "tailwind.css"}
+TW_SPACING_PX = 4  # Tailwind v4 default --spacing: 0.25rem
+
+
+def js_detectors(src: Source, p: str, text: str, system_hex: dict[str, str]) -> Iterable[Finding]:
+    """Checks for JavaScript/TypeScript, JSX, Vue and Svelte components, Tailwind classes, and React Native."""
 
     # LAY-01 — user-agent sniffing for Apple devices
     for m in re.finditer(r"navigator\.(?:userAgent|platform)[^\n;]{0,80}(?:iPhone|iPad|iPod|Macintosh|MacIntel)|/(?:[^/\n]*\|)?(?:iPhone|iPad|iPod)(?:\|[^/\n]*)?/i?\.test\(\s*navigator\.(?:userAgent|platform)", text):
@@ -466,10 +486,61 @@ def script_detectors(src: Source, system_hex: dict[str, str]) -> Iterable[Findin
     for m in re.finditer(r"(?:styled\.[\w]+|styled\([^)]*\)|css|createGlobalStyle|keyframes)`(.*?)`", text, re.S):
         yield from style_detectors(src, m.group(1), m.start(1), system_hex)
 
-    if src.path.suffix.lower() in {".jsx", ".tsx"}:
-        yield from shared_markup_and_script(src, p, text)
-    else:
-        yield from click_here(src, p)
+    at = lambda m: src.line_of(m.start())  # noqa: E731
+
+    # COL-01 — Apple system color values in strings, style objects, and Tailwind arbitrary values
+    if system_hex and src.path.name not in TOKEN_FILES:
+        for m in re.finditer(r"[\"'`\[]#([0-9a-fA-F]{6})\b", text):
+            hexv = "#" + m.group(1).upper()
+            if hexv in system_hex:
+                yield Finding("COL-01", p, src.line_of(m.start() + 1), f"Hard-coded Apple system color value {hexv}.",
+                              f"Use the token `var(--adl-{re.sub(r'(?<!^)(?=[A-Z])', '-', system_hex[hexv]).lower()})` "
+                              "(Tailwind: the generated theme; React Native: `systemColor()`), which adapts to dark mode and Increase Contrast.")
+
+    # TYP-02 / TYP-03 — Tailwind arbitrary text sizes and light weights
+    for m in re.finditer(r"(?<![\w-])text-\[([0-9.]+)(px|rem)\]", text):
+        px = css_len_to_px(m.group(1), m.group(2))
+        if px is not None and px < 11:
+            yield Finding("TYP-02", p, at(m), f"`{m.group(0)}` (≈{px:g}px) is below the 11 pt iOS minimum.",
+                          "Use `text-caption2` or larger from the generated Tailwind theme.")
+    for m in re.finditer(r"(?<![\w-])font-(thin|extralight|light)(?![\w-])", text):
+        yield Finding("TYP-03", p, at(m), f"`font-{m.group(1)}` is hard to read in interface text.", "Use `font-normal` … `font-bold`.")
+
+    # A11Y-01 — Tailwind size classes below 44 px on buttons and links
+    for m in re.finditer(r"<(button|a)\b(" + TAG_ATTRS + r")>", text, re.I):
+        cls = re.search(r"\bclass(?:Name)?\s*=\s*[\"'{`]([^\"'`}]*)", m.group(2))
+        if not cls or re.search(r"min-(?:h|w)-(?:control|1[1-9]|[2-9]\d|\[(?:4[4-9]|[5-9]\d)px\])|size-control", cls.group(1)):
+            continue
+        sizes = [float(v) * TW_SPACING_PX for v in re.findall(r"(?<![\w-])(?:size|h|w)-(\d+(?:\.\d+)?)(?![\w.-])", cls.group(1))]
+        if sizes and min(sizes) < 44:
+            yield Finding("A11Y-01", p, at(m), f"<{m.group(1)}> is sized to {min(sizes):g}px — below the 44px touch minimum.",
+                          "Add `min-h-control min-w-control` (44 px) from the generated Tailwind theme, keeping the icon small if needed.")
+
+    # A11Y-05 — React Native text that can't scale; Next.js viewport that blocks zoom
+    for m in re.finditer(r"allowFontScaling\s*(?:=\s*\{\s*false\s*\}|:\s*false)|maxFontSizeMultiplier\s*(?:=\s*\{\s*|:\s*)(?:0?\.\d+|1(?:\.0+)?)\b(?!\.\d*[1-9])", text):
+        yield Finding("A11Y-05", p, at(m), "Text is prevented from scaling with the system text size.",
+                      "Leave `allowFontScaling` on and don't cap `maxFontSizeMultiplier` at 1; use `dynamicTypeRamp` so text follows Dynamic Type.")
+    for m in re.finditer(r"\b(?:maximumScale\s*:\s*1(?:\.0+)?\b|userScalable\s*:\s*(?:false|[\"']no[\"']))", text):
+        yield Finding("A11Y-05", p, at(m), f"Viewport setting `{m.group(0)}` disables zoom.",
+                      "Remove `maximumScale` and `userScalable` from the viewport export; keep `viewportFit: \"cover\"`.")
+
+    # COL-07 — React Native forcing an appearance
+    for m in re.finditer(r"Appearance\.setColorScheme\s*\(\s*[\"'](?:light|dark)[\"']", text):
+        yield Finding("COL-07", p, at(m), "Forces a color scheme instead of following the system appearance.",
+                      "Remove it and support light and dark with `PlatformColor` / `systemColor()`.")
+
+    # LAY-01 — React Native device checks
+    for m in re.finditer(r"\bPlatform\.isPad\b|\bDeviceInfo\.isTablet\s*\(", text):
+        yield Finding("LAY-01", p, at(m), f"`{m.group(0)}` ties layout to a device type.",
+                      "Decide layout from `useWindowDimensions()` — iPad and Mac windows resize.")
+
+    # A11Y-03 — React Native pressables with no text and no label
+    for m in re.finditer(r"<(Pressable|TouchableOpacity|TouchableHighlight|TouchableWithoutFeedback)\b(" + TAG_ATTRS + r")>(.*?)</\1>", text, re.S):
+        attrs, inner = m.group(2), m.group(3)
+        if re.search(r"accessibilityLabel\s*=|aria-label\s*=|accessibilityLabelledBy\s*=|aria-labelledby\s*=", attrs) or re.search(r"<Text\b", inner):
+            continue
+        yield Finding("A11Y-03", p, at(m), f"<{m.group(1)}> has no text and no accessibility label.",
+                      "Add `accessibilityLabel=\"<Action>\"` (and `role=\"button\"`).")
 
 
 def shared_markup_and_script(src: Source, p: str, text: str) -> Iterable[Finding]:
@@ -498,16 +569,20 @@ def shared_markup_and_script(src: Source, p: str, text: str) -> Iterable[Finding
                       "Add `alt=\"…\"` describing the image, or `alt=\"\"` if purely decorative.")
 
     # A11Y-03 — buttons/links with no accessible name
-    for m in re.finditer(r"<(button|a)\b([^>]*)>(.*?)</\1>", text, re.I | re.S):
+    for m in re.finditer(r"<(button|a)\b(" + TAG_ATTRS + r")>(.*?)</\1>", text, re.I | re.S):
         attrs, inner = m.group(2), m.group(3)
         if re.search(r"aria-label(?:ledby)?\s*=|title\s*=", attrs, re.I):
             continue
-        if re.search(r"aria-label(?:ledby)?\s*=|<title>|\balt\s*=\s*[\"'][^\"']+", inner, re.I):
-            continue
-        visible = re.sub(r"<[^>]+>|\{[^}]*\}|&nbsp;|\s", "", inner)
-        if not visible:
+        if not has_accessible_text(inner):
             yield Finding("A11Y-03", p, src.line_of(m.start()), f"<{m.group(1)}> has no accessible name.",
                           "Add visible text, `aria-label=\"…\"`, or visually hidden text for icon-only controls.")
+
+    # STK-03 — click handlers on non-interactive elements
+    for m in re.finditer(r"<(div|span|li|p|img|section|article)\b(" + TAG_ATTRS + r")>", text, re.I):
+        attrs = m.group(2)
+        if re.search(r"(?<![\w-])(?:onClick|onclick|@click|v-on:click|on:click)\s*=", attrs) and not re.search(r"\brole\s*=", attrs):
+            yield Finding("STK-03", p, src.line_of(m.start()), f"<{m.group(1)}> has a click handler but no role or keyboard support.",
+                          "Use a `<button type=\"button\">` (or `<a href>` for navigation); it brings the role, focus, and keyboard activation.")
 
     # CMP-21 — password inputs not typed as password
     for m in re.finditer(r"<input\b[^>]*>", text, re.I):
@@ -517,6 +592,28 @@ def shared_markup_and_script(src: Source, p: str, text: str) -> Iterable[Finding
                           "Use `type=\"password\"` with `autocomplete=\"current-password\"` or `\"new-password\"`, and never prefill it.")
 
     yield from click_here(src, p)
+
+
+# Attributes of an HTML/JSX start tag, allowing `>` inside {…} expressions such as onClick={() => f()}.
+TAG_ATTRS = r"(?:[^>{]|\{(?:[^{}]|\{[^{}]*\})*\})*"
+ICON_EXPR = re.compile(r"^\{\s*[\w.]*icon[\w.]*\s*\}$", re.I)
+
+
+def has_accessible_text(inner: str) -> bool:
+    """True when element content can supply an accessible name: visible text, a labelled child, or a
+    JSX/Vue/Svelte expression that isn't obviously an icon. Content inside aria-hidden elements doesn't count."""
+    if re.search(r"aria-label(?:ledby)?\s*=|<title>|\balt\s*=\s*[\"'][^\"']+", inner, re.I):
+        return True
+    hidden = re.compile(r"<(\w+)\b[^>]*aria-hidden\s*=\s*(?:[\"']true[\"']|\{true\})[^>]*>.*?</\1>", re.I | re.S)
+    inner = hidden.sub("", inner)
+    inner = re.sub(r"<[^>]+/>", "", inner)          # self-closing elements (icons)
+    inner = re.sub(r"<[^>]+>", "", inner)           # remaining tags; keep their text
+    for expr in re.findall(r"\{\{.*?\}\}|\{[^{}]*\}", inner, re.S):
+        body = expr.strip("{} \n")
+        if body and not ICON_EXPR.match("{" + body + "}") and not body.startswith("/*"):
+            return True
+    visible = re.sub(r"\{\{.*?\}\}|\{[^{}]*\}|&nbsp;|\s", "", inner, flags=re.S)
+    return bool(visible)
 
 
 def plist_detectors(src: Source) -> Iterable[Finding]:
@@ -540,6 +637,7 @@ def font_file_detectors(path: Path) -> Iterable[Finding]:
 DETECTED_RULES = {
     "LAY-01", "GLS-02", "GLS-04", "GLS-08", "COL-01", "COL-07", "TYP-01", "TYP-02", "TYP-03", "TYP-04",
     "TYP-05", "TYP-08", "MOT-02", "A11Y-01", "A11Y-03", "A11Y-04", "A11Y-05", "WRT-02", "NAV-09", "CMP-13", "CMP-21",
+    "STK-03",
 }
 
 
