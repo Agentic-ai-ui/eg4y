@@ -14,7 +14,7 @@ flowchart LR
     B --> J[rules.json<br/>machine-readable]
     B --> I[README index]
     J --> H[hooks/<br/>automated checks]
-    R --> A[AGENTS.md · CLAUDE.md<br/>skills/]
+    R --> A[AGENTS.md · .claude/CLAUDE.md<br/>skills/]
 ```
 
 ---

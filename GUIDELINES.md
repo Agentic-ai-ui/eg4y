@@ -10,7 +10,7 @@
 | **Not the purpose** | Cloning Apple devices, Apple apps, Apple logos, or Apple branding. See [§18 Brand and legal boundaries](#18-brand-and-legal-boundaries). |
 | **Primary sources** | [Apple Human Interface Guidelines (HIG)](https://developer.apple.com/design/human-interface-guidelines) · [Apple Developer Documentation](https://developer.apple.com/documentation) |
 | **Verified against** | HIG content current through **September 2026** (Liquid Glass, iOS 27 era, iPhone Duo). |
-| **Consumed by** | [`rules/`](rules/README.md) (enforceable rules with IDs) · `skills/apple-design-language/` (skill + references) · `AGENTS.md` / `CLAUDE.md` · `hooks/` |
+| **Consumed by** | [`rules/`](rules/README.md) (enforceable rules with IDs) · `skills/apple-design-language/` (skill + references) · `AGENTS.md` / `.claude/CLAUDE.md` · `hooks/` |
 
 ---
 
