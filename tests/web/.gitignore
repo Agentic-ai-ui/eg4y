@@ -1,0 +1,13 @@
+node_modules/
+dist/
+nextjs/.next/
+shots/
+*.tsbuildinfo
+# Copied from skills/apple-design-language/assets by scripts/prepare.mjs — never edit these copies
+react/src/styles/
+react-native/theme/tokens.native.ts
+nextjs/app/tokens.css
+nextjs/app/components.css
+vue/public/
+svelte/public/
+nextjs/next-env.d.ts

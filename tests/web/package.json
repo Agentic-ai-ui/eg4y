@@ -1,0 +1,48 @@
+{
+  "name": "apple-design-language-web-recipes",
+  "private": true,
+  "description": "Verification harness for the web and React Native recipes in skills/apple-design-language/references. Created by Edison Augustin X.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "prepare-assets": "node scripts/prepare.mjs",
+    "typecheck": "npm run prepare-assets && tsc -p react && tsc -p tailwind && tsc -p react-native && vue-tsc -p vue && svelte-check --workspace svelte --tsconfig ./tsconfig.json --threshold warning --fail-on-warnings",
+    "build": "npm run prepare-assets && node scripts/build.mjs",
+    "build:next": "npm run prepare-assets && next build nextjs && node scripts/check-next.mjs",
+    "verify": "node scripts/verify.mjs",
+    "test": "npm run typecheck && npm run build && npm run build:next && npm run verify"
+  },
+  "devDependencies": {
+    "@lucide/svelte": "1.48.0",
+    "@lucide/vue": "1.48.0",
+    "@playwright/test": "1.63.0",
+    "@react-navigation/native-stack": "7.19.2",
+    "@sveltejs/vite-plugin-svelte": "7.3.1",
+    "@tailwindcss/cli": "4.3.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-vue": "6.0.9",
+    "axe-core": "4.13.0",
+    "esbuild": "0.28.2",
+    "expo": "57.0.25",
+    "expo-glass-effect": "57.0.4",
+    "expo-router": "57.0.23",
+    "expo-symbols": "57.0.3",
+    "lucide-react": "1.48.0",
+    "next": "16.3.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-native": "0.87.1",
+    "react-native-safe-area-context": "5.10.0",
+    "svelte": "5.57.1",
+    "svelte-check": "4.7.6",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vite": "8.3.1",
+    "vue": "3.5.43",
+    "vue-tsc": "3.3.11"
+  }
+}

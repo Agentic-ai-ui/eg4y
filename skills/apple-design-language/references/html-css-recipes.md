@@ -43,6 +43,7 @@ Plain HTML gets further than most people expect: `<dialog>` gives modal sheets a
 
 ## 3. A complete screen
 
+<!-- source: tests/web/html/index.html -->
 ```html
 <!doctype html>
 <html lang="en">
@@ -50,7 +51,8 @@ Plain HTML gets further than most people expect: `<dialog>` gives modal sheets a
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
-  <title>Library</title>
+  <link rel="icon" href="data:,">
+  <title>Library — HTML + CSS</title>
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="components.css">
 </head>

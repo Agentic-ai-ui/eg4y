@@ -218,6 +218,8 @@ One screen, seven implementations, one design. The same Library screen — tab b
 
 What makes the builds match is shared source: every web stack uses the same generated `tokens.css` and hand-written `components.css`; Tailwind maps its theme onto the same tokens; React Native gets the same values through `PlatformColor` and Dynamic Type.
 
+This isn’t a one-time check: the seven projects live in [`tests/web`](tests/web/README.md), the code blocks in the references are copied from them (CI fails if they drift), and CI runs the whole harness on every pull request.
+
 ---
 
 ## How it was researched and verified
@@ -256,7 +258,13 @@ python3 -m unittest discover -s hooks/tests
 claude plugin validate . && claude plugin validate .claude-plugin/plugin.json
 ```
 
-[CI](.github/workflows/ci.yml) runs all of these on every pull request and every push to `main`: generated files up to date, the hook tests on Python 3.9–3.13, and strict plugin validation.
+[CI](.github/workflows/ci.yml) runs all of these on every pull request and every push to `main`: generated files and recipe docs up to date, the hook tests on Python 3.9–3.13, strict plugin validation, and the web and React Native recipes in [`tests/web`](tests/web/README.md) — type-checked, built, and run in Chromium with axe-core.
+
+```bash
+# Web and React Native recipes (Node 22)
+cd tests/web && npm ci && npx playwright install chromium && npm test
+python3 tests/web/sync_docs.py            # copy edited recipe files into the references (--check in CI)
+```
 
 ---
 
@@ -285,7 +293,7 @@ Conventions for contributors and agents are in [`AGENTS.md` › Maintaining this
 ├── GUIDELINES.md                      ← the design language, with Apple sources
 ├── AGENTS.md                          ← instructions for any coding agent
 ├── .claude/CLAUDE.md                  ← Claude Code additions (imports AGENTS.md)
-├── .github/workflows/ci.yml           ← CI: generated files, tests (Python 3.9–3.13), plugin validation
+├── .github/workflows/ci.yml           ← CI: generated files, tests (Python 3.9–3.13), plugin validation, web recipes
 ├── .github/workflows/release.yml      ← publishes the GitHub release (Run workflow button or v* tag)
 ├── .claude-plugin/
 │   ├── plugin.json                    ← plugin manifest
@@ -307,6 +315,7 @@ Conventions for contributors and agents are in [`AGENTS.md` › Maintaining this
 │   ├── assets/components.css          ← shared web components for every web stack
 │   ├── scripts/build_tokens.py        ← validator / generator
 │   └── evals/evals.json               ← test prompts with rule-ID assertions
+├── tests/web/                         ← the web and React Native recipes as tested projects + browser harness
 └── hooks/
     ├── README.md                      ← coverage, protocol, install
     ├── hooks.json                     ← plugin hook wiring

@@ -1,0 +1,5 @@
+@import "tailwindcss" source(".");
+/* The generated theme (it imports tokens.css into the base layer) — straight from the skill's assets */
+@import "../../../../skills/apple-design-language/assets/tailwind.css";
+/* Dialogs, menus, segmented control and fields from the shared stylesheet, below utilities in the cascade */
+@import "../../../../skills/apple-design-language/assets/components.css" layer(components);

@@ -48,6 +48,7 @@ Your HTML needs the viewport and color-scheme metadata (A11Y-05, LAY-02, COL-07)
 
 Appearance, contrast, and motion live in CSS (`tokens.css` switches every variable), so most components need no JavaScript for them. Use these hooks only when logic depends on a setting — for example choosing an animation or a canvas color. `useSyncExternalStore` keeps them correct during server rendering (the third argument supplies the server value).
 
+<!-- source: tests/web/react/src/hooks.ts -->
 ```ts
 import { useCallback, useSyncExternalStore } from "react";
 
@@ -77,6 +78,7 @@ export const usePrefersDark = () => useMediaQuery("(prefers-color-scheme: dark)"
 
 Define the top-level sections **once** and render them with one component. `components.css` presents the same `<nav>` as a floating tab bar in compact widths and a sidebar in regular widths, using a container query on the app’s own width — never the device (LAY-01, NAV-06, SYNC-01). Links, not buttons: tabs navigate and never act (NAV-01); the current section carries `aria-current="page"`. Show every section always — never disable or hide one (NAV-03); keep labels to one word (NAV-04).
 
+<!-- source: tests/web/react/src/AppShell.tsx -->
 ```tsx
 import type { ReactNode } from "react";
 
@@ -120,6 +122,7 @@ With a router, derive `currentId` from the location (React Router `useLocation`,
 
 Leading items, an optional title, trailing items with the single prominent action last (NAV-11). Use icon buttons with labels (A11Y-03) and keep brand color out of the bar (GLS-04). When the page shows a large title, leave the toolbar title out (NAV-15).
 
+<!-- source: tests/web/react/src/Toolbar.tsx -->
 ```tsx
 import type { ReactNode } from "react";
 
@@ -142,6 +145,7 @@ export function Toolbar({ title, leading, trailing }: { title?: string; leading?
 
 Three styles distinguish choices without changing size (CMP-02): `prominent` (accent fill — at most one or two per view, CMP-01), `bordered` (default), and `plain` (toolbars, sheet headers). The union type makes a prominent destructive button a compile error (CMP-04). Icon-only buttons require a `label` (A11Y-03).
 
+<!-- source: tests/web/react/src/Button.tsx -->
 ```tsx
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
@@ -177,6 +181,7 @@ Colored text meets WCAG 2.2 AA (4.5:1) only on the page background or a list row
 
 Inset grouped lists carry most settings and navigation screens. Rows are at least 44 px tall; rows that navigate show a disclosure indicator (CMP-19); an action row such as “Delete All” uses red text (CMP-14).
 
+<!-- source: tests/web/react/src/List.tsx -->
 ```tsx
 import type { ReactNode } from "react";
 
@@ -225,6 +230,7 @@ export function ActionRow({ title, destructive, onSelect }: { title: string; des
 
 Switches live in list rows, and the whole row is the hit target (CMP-23, A11Y-01). The native checkbox with `role="switch"` gives VoiceOver the right role and state; the thumb position shows state as well as the color (COL-03).
 
+<!-- source: tests/web/react/src/Switch.tsx -->
 ```tsx
 import { useId } from "react";
 
@@ -255,6 +261,7 @@ export function SwitchRow({ label, checked, onChange, disabled }: {
 
 A segmented control picks one of a few options (CMP-24, CMP-25). Native radio buttons in a `fieldset` provide grouping, arrow-key selection, and state for free. When the segments switch *views* rather than a value, use the WAI-ARIA tabs pattern (`tablist`/`tab`/`tabpanel`) instead.
 
+<!-- source: tests/web/react/src/SegmentedPicker.tsx -->
 ```tsx
 import { useId } from "react";
 
@@ -290,6 +297,7 @@ export function SegmentedPicker<T extends string>({ label, options, value, onCha
 
 Every field has a visible label. Set `type`, `autoComplete`, `inputMode`, and `enterKeyHint` for the content (CMP-22); passwords use `type="password"` with `autoComplete="current-password"` or `"new-password"` and are never prefilled (CMP-21). Errors say how to fix the problem (WRT-07) and are shown by text and a border, not color alone (COL-03).
 
+<!-- source: tests/web/react/src/TextField.tsx -->
 ```tsx
 import { useId, type InputHTMLAttributes } from "react";
 
@@ -327,6 +335,7 @@ export function TextField({ label, hint, error, ...input }: Omit<InputHTMLAttrib
 
 Build modals on the native `<dialog>` with `showModal()`: the browser provides focus containment, an inert page behind, top-layer stacking, and Esc. Present one modal at a time (CMP-07) with an obvious dismissal (CMP-08): Cancel on the leading edge, the confirming action on the trailing edge (CMP-09). In compact widths the sheet rises from the bottom; in regular widths it’s a centered card. If a sheet holds unsaved changes, confirm before discarding them.
 
+<!-- source: tests/web/react/src/Sheet.tsx -->
 ```tsx
 import { useEffect, useId, useRef, type ReactNode } from "react";
 
@@ -387,6 +396,7 @@ export function Sheet({ open, title, onCancel, confirm, children }: {
 
 Use alerts rarely, for critical, actionable information (CMP-11). Title them specifically — never just “Error” — and give one to three verb-titled buttons, “Cancel” to cancel, never “Yes”/“No” (CMP-12, CMP-13). The tuple type caps buttons at three. Cancel is never the default and a destructive action is never prominent: initial focus goes to the default action, or to the title when there is none, so Return never triggers a risky choice.
 
+<!-- source: tests/web/react/src/Alert.tsx -->
 ```tsx
 import { useEffect, useId, useRef } from "react";
 
@@ -469,6 +479,7 @@ export function Alert({ open, title, message, actions }: {
 
 The popover API gives light dismiss, Esc, and top-layer stacking without a library. Order items by frequency, put destructive items last in red (CMP-17), and keep one menu open at a time (CMP-16). The menu anchors below its button where CSS anchor positioning is supported (Safari 26, Chrome 125, Firefox 147) and centers before that. For full menu keyboard semantics (arrow keys, type-ahead), follow the WAI-ARIA menu button pattern.
 
+<!-- source: tests/web/react/src/ActionMenu.tsx -->
 ```tsx
 import { useId, useRef, type ReactNode } from "react";
 
@@ -527,6 +538,7 @@ export function ActionMenu({ label, icon, items }: { label: string; icon: ReactN
 
 `tokens.ts` exports CSS-variable references, so inline styles and CSS-in-JS follow appearance and contrast automatically (COL-01, COL-02):
 
+<!-- source: tests/web/react/src/Badge.tsx -->
 ```tsx
 import { color, text, layout } from "./styles/tokens";
 
@@ -543,6 +555,7 @@ export const floatingButtonInset = { bottom: `calc(${layout.safeBottom} + 16px)`
 
 Animate only to explain change, and honor Reduce Motion (MOT-01, MOT-02). CSS transitions that use `var(--adl-motion-duration)` shrink to 1 ms automatically under Reduce Motion; for JavaScript-driven motion, branch on the hook:
 
+<!-- source: tests/web/react/src/useEntranceAnimation.ts -->
 ```ts
 import { usePrefersReducedMotion } from "./hooks";
 
@@ -558,6 +571,7 @@ export function useEntranceAnimation(element: HTMLElement | null) {
 
 ## 13. Putting a screen together
 
+<!-- source: tests/web/react/src/demo.tsx -->
 ```tsx
 import { useState } from "react";
 import { createRoot } from "react-dom/client";

@@ -15,12 +15,13 @@ Both frameworks use the shared [`tokens.css`](../assets/tokens.css) and [`compon
 
 ## 1. Setup
 
-Copy `tokens.css` and `components.css` into your project and import them once (Vue: `main.ts`; Svelte: the root component or `+layout.svelte`). Keep the viewport and color-scheme metadata from [`web-adaptation.md` › Setup](web-adaptation.md#3-setup). For icons, use an open-licensed set (`lucide-vue-next`, `@lucide/svelte`, Phosphor, Heroicons…) — never SF Symbols on the web (BRD-03).
+Copy `tokens.css` and `components.css` into your project and import them once (Vue: `main.ts`; Svelte: the root component or `+layout.svelte`). Keep the viewport and color-scheme metadata from [`web-adaptation.md` › Setup](web-adaptation.md#3-setup). For icons, use an open-licensed set (`@lucide/vue`, `@lucide/svelte`, Phosphor, Heroicons…) — never SF Symbols on the web (BRD-03).
 
 ## 2. Vue
 
 ### Media queries
 
+<!-- source: tests/web/vue/src/useMediaQuery.ts -->
 ```ts
 import { onScopeDispose, readonly, ref, type Ref } from "vue";
 
@@ -43,6 +44,7 @@ export const usePrefersMoreContrast = () => useMediaQuery("(prefers-contrast: mo
 
 ### App shell: tab bar ⇄ sidebar (NAV-06, SYNC-01)
 
+<!-- source: tests/web/vue/src/AppShell.vue -->
 ```vue
 <script setup lang="ts">
 import type { Component } from "vue";
@@ -72,6 +74,7 @@ defineProps<{ sections: readonly Section[]; currentId: string }>();
 
 ### Switch row and segmented control (CMP-23 – CMP-25)
 
+<!-- source: tests/web/vue/src/SwitchRow.vue -->
 ```vue
 <script setup lang="ts">
 defineProps<{ label: string; disabled?: boolean }>();
@@ -87,6 +90,7 @@ const checked = defineModel<boolean>({ required: true });
 </template>
 ```
 
+<!-- source: tests/web/vue/src/SegmentedPicker.vue -->
 ```vue
 <script setup lang="ts" generic="T extends string">
 import { useId } from "vue";
@@ -109,6 +113,7 @@ const name = useId();
 
 ### Sheet (CMP-07 – CMP-09)
 
+<!-- source: tests/web/vue/src/Sheet.vue -->
 ```vue
 <script setup lang="ts">
 import { useId, useTemplateRef, watchEffect } from "vue";
@@ -147,6 +152,7 @@ watchEffect(() => {
 
 ### Alert (CMP-11 – CMP-13)
 
+<!-- source: tests/web/vue/src/Alert.vue -->
 ```vue
 <script setup lang="ts">
 import { computed, useId, useTemplateRef, watchEffect } from "vue";
@@ -214,6 +220,7 @@ function onEscape() {
 
 ### Menu (CMP-16, CMP-17)
 
+<!-- source: tests/web/vue/src/ActionMenu.vue -->
 ```vue
 <script setup lang="ts">
 import { useId, useTemplateRef, type Component } from "vue";
@@ -255,10 +262,11 @@ function select(item: MenuItem) {
 
 ### A screen
 
+<!-- source: tests/web/vue/src/App.vue -->
 ```vue
 <script setup lang="ts">
 import { ref } from "vue";
-import { House, Library, Search, Settings, Plus, Ellipsis } from "lucide-vue-next";
+import { House, Library, Search, Settings, Plus, Ellipsis } from "@lucide/vue";
 import AppShell, { type Section } from "./AppShell.vue";
 import SwitchRow from "./SwitchRow.vue";
 import SegmentedPicker from "./SegmentedPicker.vue";
@@ -341,6 +349,7 @@ const reduced = usePrefersReducedMotion();
 
 Svelte 5.7+ includes reactive media queries (`MediaQuery` in `svelte/reactivity`) and a ready-made `prefersReducedMotion` in `svelte/motion` — no custom store needed.
 
+<!-- source: tests/web/svelte/src/media.ts -->
 ```ts
 import { MediaQuery } from "svelte/reactivity";
 
@@ -352,6 +361,7 @@ export const prefersDark = new MediaQuery("prefers-color-scheme: dark");
 
 ### App shell: tab bar ⇄ sidebar (NAV-06, SYNC-01)
 
+<!-- source: tests/web/svelte/src/AppShell.svelte -->
 ```svelte
 <script lang="ts" module>
   import type { Component, Snippet } from "svelte";
@@ -383,6 +393,7 @@ export const prefersDark = new MediaQuery("prefers-color-scheme: dark");
 
 ### Switch row and segmented control (CMP-23 – CMP-25)
 
+<!-- source: tests/web/svelte/src/SwitchRow.svelte -->
 ```svelte
 <script lang="ts">
   let { label, checked = $bindable(), disabled = false }: { label: string; checked: boolean; disabled?: boolean } = $props();
@@ -395,6 +406,7 @@ export const prefersDark = new MediaQuery("prefers-color-scheme: dark");
 </label>
 ```
 
+<!-- source: tests/web/svelte/src/SegmentedPicker.svelte -->
 ```svelte
 <script lang="ts" generics="T extends string">
   let { label, options, value = $bindable() }: { label: string; options: readonly { value: T; title: string }[]; value: T } = $props();
@@ -414,6 +426,7 @@ export const prefersDark = new MediaQuery("prefers-color-scheme: dark");
 
 ### Sheet (CMP-07 – CMP-09)
 
+<!-- source: tests/web/svelte/src/Sheet.svelte -->
 ```svelte
 <script lang="ts">
   import type { Snippet } from "svelte";
@@ -462,6 +475,7 @@ export const prefersDark = new MediaQuery("prefers-color-scheme: dark");
 
 `autofocus` is deliberate here — it implements the HIG’s rule that Cancel is never the default — so the compiler’s `a11y_autofocus` warning is silenced with a comment.
 
+<!-- source: tests/web/svelte/src/Alert.svelte -->
 ```svelte
 <script lang="ts" module>
   export type AlertAction = { label: string; role?: "default" | "cancel" | "destructive"; onSelect: () => void };
@@ -528,6 +542,7 @@ export const prefersDark = new MediaQuery("prefers-color-scheme: dark");
 
 `$props.id()` must be a plain top-level initializer, so derive the menu id in a second step.
 
+<!-- source: tests/web/svelte/src/ActionMenu.svelte -->
 ```svelte
 <script lang="ts" module>
   export type MenuItem = { label: string; destructive?: boolean; onSelect: () => void };
@@ -568,6 +583,7 @@ export const prefersDark = new MediaQuery("prefers-color-scheme: dark");
 
 ### A screen
 
+<!-- source: tests/web/svelte/src/App.svelte -->
 ```svelte
 <script lang="ts">
   import { House, Library, Search, Settings, Plus, Ellipsis } from "@lucide/svelte";
