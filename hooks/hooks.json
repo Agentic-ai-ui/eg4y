@@ -1,0 +1,50 @@
+{
+  "description": "Apple Design Language (Created by Edison Augustin X.): checks edited UI files against the HIG-derived rules, routes Apple-platform UI requests to the right skill references, and adds a compact design brief at session start in Apple/web UI projects.",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/hig_lint.py",
+              "--hook"
+            ],
+            "timeout": 30,
+            "statusMessage": "Checking Apple design rules"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/prompt_router.py"
+            ],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session_context.py"
+            ],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

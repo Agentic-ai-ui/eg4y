@@ -1,0 +1,46 @@
+{
+  "skill_name": "apple-design-language",
+  "author": "Edison Augustin X.",
+  "notes": "Realistic prompts for evaluating the skill with the skill-creator workflow (with-skill vs. without-skill runs). Assertions reference rule IDs in rules/rules.json.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm building a recipe app in SwiftUI that needs to run on iPhone, iPad and Mac. Sections are Recipes, Meal Plan, Shopping List and Search. Can you set up the root navigation and the recipe list screen with swipe to delete and an add button?",
+      "expected_output": "A TabView with .sidebarAdaptable (or NavigationSplitView), a search tab via Tab(role: .search), a List with swipe actions and matching context menu, a labeled toolbar add button, an empty state, text styles and semantic colors, no device-idiom checks, and macOS menu commands for the add action.",
+      "files": [],
+      "assertions": [
+        {"text": "Uses a platform-adaptive navigation container (TabView with sidebarAdaptable or NavigationSplitView) instead of device checks", "rules": ["NAV-06", "LAY-01"]},
+        {"text": "Search is a dedicated search tab or toolbar search, not a regular action tab", "rules": ["NAV-16", "NAV-01"]},
+        {"text": "Icon-only controls have accessibility labels (Button(_:systemImage:) or Label)", "rules": ["A11Y-03"]},
+        {"text": "No hard-coded font sizes or color literals in views", "rules": ["TYP-01", "COL-01"]},
+        {"text": "Delete is not guarded by a confirmation alert for a common undoable action", "rules": ["CMP-11"]}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "review this for apple design issues please:\n\nstruct SettingsView: View {\n  var body: some View {\n    VStack {\n      Text(\"SETTINGS\").font(.system(size: 9, weight: .thin))\n      HStack { Image(systemName: \"gear\").frame(width: 20, height: 20).onTapGesture { open() } }\n      Toggle(\"Dark mode\", isOn: $dark)\n    }\n    .background(Color(red: 0.1, green: 0.1, blue: 0.1))\n    .preferredColorScheme(dark ? .dark : .light)\n    .alert(\"Error\", isPresented: $err) { Button(\"Yes\") {}; Button(\"No\") {} }\n  }\n}",
+      "expected_output": "A review report with errors first, citing TYP-01, TYP-02, TYP-03, A11Y-01, A11Y-03, COL-01, COL-07/SYS-03, CMP-12, CMP-13, with concrete SwiftUI fixes.",
+      "files": [],
+      "assertions": [
+        {"text": "Flags the 9 pt thin text as below the iOS minimum and a light weight", "rules": ["TYP-02", "TYP-03"]},
+        {"text": "Flags the 20x20 tap target and missing label on the gear image", "rules": ["A11Y-01", "A11Y-03"]},
+        {"text": "Flags the in-app dark mode toggle / forced color scheme", "rules": ["COL-07", "SYS-03"]},
+        {"text": "Flags the vague 'Error' alert title and Yes/No buttons", "rules": ["CMP-12", "CMP-13"]},
+        {"text": "Uses the report template with rule IDs, locations, and fixes", "rules": []}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "We have a marketing + booking web app (React) that most of our customers open on iPhone and Mac Safari. Make the header, bottom tab bar and booking button feel native to Apple devices. We currently bundle SF-Pro.woff2 and disable zoom with user-scalable=no.",
+      "expected_output": "Guidance and code that removes the bundled SF Pro font and zoom lock, adopts system font stacks and tokens.css, safe-area insets, 44px targets, prefers-color-scheme/contrast/reduced-motion, a translucent bar with opaque fallbacks, and no imitation of iOS system chrome.",
+      "files": [],
+      "assertions": [
+        {"text": "Tells them to stop bundling SF Pro and use system font stacks", "rules": ["TYP-04"]},
+        {"text": "Removes user-scalable=no / maximum-scale", "rules": ["A11Y-05"]},
+        {"text": "Uses env(safe-area-inset-*) with viewport-fit=cover", "rules": ["LAY-02"]},
+        {"text": "Ensures 44px minimum interactive targets", "rules": ["A11Y-01"]},
+        {"text": "Notes that prefers-reduced-transparency isn't available in Safari and provides another fallback", "rules": ["GLS-06"]}
+      ]
+    }
+  ]
+}

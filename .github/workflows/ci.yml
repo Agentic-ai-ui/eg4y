@@ -1,0 +1,75 @@
+# Apple Design Language — CI
+# Created by Edison Augustin X.
+#
+# Runs the same checks a contributor runs locally (see AGENTS.md › Commands):
+#   1. generated files are valid and up to date (rules.json + rules index, tokens.css + design-tokens.md)
+#   2. hook test suite on every supported Python (3.9 is what macOS ships with Xcode's tools)
+#   3. plugin and marketplace manifests pass Claude Code's strict validator
+#
+# Runners are pinned to ubuntu-24.04: actions/python-versions has no Python 3.9 build for Ubuntu 26.04.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generated-files:
+    name: Rules and tokens are valid and up to date
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Validate rules (rules.json and index up to date)
+        run: python3 rules/tools/build_rules.py --check
+      - name: Validate design tokens (tokens.css and design-tokens.md up to date)
+        run: python3 skills/apple-design-language/scripts/build_tokens.py --check
+
+  hook-tests:
+    name: Hook tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Detector coverage for every hook rule
+        run: python3 hooks/scripts/hig_lint.py --list-rules
+      - name: Run tests
+        run: python3 -m unittest discover -s hooks/tests -v
+
+  plugin:
+    name: Plugin and marketplace manifests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      CLAUDE_CODE_VERSION: "2.1.283"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - name: Install Claude Code CLI
+        run: npm install --global "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+      - name: Validate marketplace (strict)
+        run: claude plugin validate . --strict
+      - name: Validate plugin manifest (strict)
+        run: claude plugin validate .claude-plugin/plugin.json --strict

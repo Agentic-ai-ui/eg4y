@@ -1,0 +1,30 @@
+{
+  "name": "apple-design-language",
+  "displayName": "Apple Design Language",
+  "version": "1.0.0",
+  "description": "Unofficial, HIG-researched design system for AI agents building apps across the Apple ecosystem (iPhone, iPad, iPhone Duo, Mac, Apple TV, Apple Vision Pro, Apple Watch): guidelines, 239 rules with IDs, a skill with references and design tokens, and hooks that check edited UI files. Created by Edison Augustin X.",
+  "author": {
+    "name": "Edison Augustin X."
+  },
+  "homepage": "https://github.com/Agentic-ai-ui/eg4y",
+  "repository": "https://github.com/Agentic-ai-ui/eg4y",
+  "license": "MIT",
+  "keywords": [
+    "apple",
+    "human-interface-guidelines",
+    "hig",
+    "liquid-glass",
+    "swiftui",
+    "uikit",
+    "appkit",
+    "ios",
+    "ipados",
+    "macos",
+    "watchos",
+    "tvos",
+    "visionos",
+    "design-system",
+    "accessibility",
+    "design-tokens"
+  ]
+}
