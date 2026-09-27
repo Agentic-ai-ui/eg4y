@@ -231,6 +231,7 @@ Conventions for contributors and agents are in [`AGENTS.md` › Maintaining this
 ```text
 .
 ├── README.md                          ← you are here
+├── LICENSE                            ← MIT
 ├── GUIDELINES.md                      ← the design language, with Apple sources
 ├── AGENTS.md                          ← instructions for any coding agent
 ├── .claude/CLAUDE.md                  ← Claude Code additions (imports AGENTS.md)
@@ -261,7 +262,7 @@ Conventions for contributors and agents are in [`AGENTS.md` › Maintaining this
 
 ## License and trademarks
 
-**License:** no license has been chosen yet. Until a `LICENSE` file is added, all rights are reserved by the author; contact **Edison Augustin X.** for permission to reuse or redistribute.
+**License:** [MIT](LICENSE) © 2026 Edison Augustin X. You may use, copy, modify, and distribute this package, including commercially, provided the copyright and license notice are kept. The MIT license covers this project’s own content; it grants no rights in Apple’s trademarks or documentation.
 
 **Trademarks:** Apple, iPhone, iPad, Mac, Apple TV, Apple Watch, Apple Vision Pro, iPadOS, macOS, tvOS, visionOS, watchOS, SF Symbols, San Francisco, and New York are trademarks of Apple Inc. **This project is independent and unofficial — it is not affiliated with, endorsed by, or sponsored by Apple Inc.** It summarizes and links to Apple’s publicly available Human Interface Guidelines and Developer Documentation; consult those sources for authoritative guidance. The guidelines are written in original wording with short, attributed quotations (such as the design-principle taglines) rather than copied pages, and Apple system fonts and symbol artwork are not included.
 
