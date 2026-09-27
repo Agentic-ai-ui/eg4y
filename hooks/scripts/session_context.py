@@ -20,7 +20,7 @@ from pathlib import Path
 PACKAGE_ROOT = Path(__file__).resolve().parents[2]
 MARKER = "Apple Design Language"
 INSTRUCTION_FILES = ["CLAUDE.md", ".claude/CLAUDE.md", "CLAUDE.local.md", "AGENTS.md", ".claude/AGENTS.md"]
-PROJECT_SIGNALS = ("Package.swift", "package.json", "Podfile", "project.yml")
+PROJECT_SIGNALS = ("Package.swift", "package.json", "Podfile", "project.yml", "app.json")
 PROJECT_SUFFIXES = (".xcodeproj", ".xcworkspace", ".swift", ".html", ".css", ".tsx", ".jsx", ".vue", ".svelte")
 
 
@@ -57,11 +57,12 @@ def brief() -> str:
     lint = PACKAGE_ROOT / "hooks" / "scripts" / "hig_lint.py"
     return "\n".join([
         f"{MARKER} (Created by Edison Augustin X.) is available for this project.",
-        f"- For Apple-platform or Apple-device web UI work, use the apple-design-language skill: {skill}",
+        f"- For Apple-platform UI work in any stack (SwiftUI, React, Next.js, HTML/CSS, Tailwind, Vue, Svelte, React Native), use the apple-design-language skill: {skill}",
         f"- Rules with IDs (MUST = error, SHOULD = warning): {rules}",
         "- Non-negotiables: layout from size classes, never device checks (LAY-01); glass only on controls/navigation (GLS-01);"
         " system colors via APIs (COL-01) and follow the system appearance (COL-07); text styles with Dynamic Type (TYP-01),"
         " never below 11 pt on iOS (TYP-02); ≥44 pt targets (A11Y-01); label icon-only controls (A11Y-03); honor Reduce Motion (MOT-02).",
+        "- Web and React Native: same rules on every stack (STK-01); native elements, not clickable divs (STK-03); no SF Symbols on the web (STK-02).",
         f"- After editing UI files a checker reports rule violations; run it manually with: python3 {lint} <files>",
         "- Design for Apple platforms; never clone Apple devices, apps, logos, or system UI (BRD-01 – BRD-04).",
     ])

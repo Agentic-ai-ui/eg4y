@@ -957,6 +957,19 @@ Verified API names from the HIG and Apple Developer Documentation. Prefer these 
 
 **Sources:** [Adopting Liquid Glass](https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass) · [Applying Liquid Glass to custom views](https://developer.apple.com/documentation/swiftui/applying-liquid-glass-to-custom-views) · [Liquid Glass overview](https://developer.apple.com/documentation/technologyoverviews/liquid-glass) · HIG pages cited above
 
+### Other implementation surfaces: web and React Native
+
+The design language is stack-neutral: every rule describes what the interface does, not which framework draws it. Apps for Apple devices are also built with **React** (the most common web stack, often with **Next.js**), **plain HTML + CSS**, **Tailwind CSS**, **Vue**, **Svelte**, and **React Native**. Apply the same rules there, translated through each stack’s own mechanism — the skill’s [stack map](skills/apple-design-language/references/stack-map.md) lists the equivalents and its recipes provide verified code.
+
+- **SHOULD** implement the same rules on every stack and translate them rather than drop the ones a stack makes harder: semantic colors that follow appearance and Increase Contrast, text styles that scale, safe areas, 44 pt targets, labels, Reduce Motion, one information architecture mapped to a tab bar or sidebar by available space.
+- **SHOULD** build web interfaces from native elements — `<button>`, `<a href>`, `<dialog>`, form controls, `popover` — which carry roles, focus, and keyboard behavior the way system components do. This is the web form of “use system components first.”
+- **SHOULD** meet WCAG 2.2 AA contrast on the web as well as the HIG minimums; WCAG asks 4.5:1 for bold text below 18.66 px where the HIG accepts 3:1, so colored text uses the increased-contrast variants of system colors.
+- **SHOULD** generate every stack’s colors, text styles, and sizes from one token source so products built in several stacks can’t drift apart.
+- **SHOULD** use native views in React Native — the system tab bar and navigation stack, `UISwitch`, system alerts and action sheets, `PlatformColor`, and Dynamic Type ramps — instead of JavaScript look-alikes.
+- A web page adopts the design language; it can’t adopt system chrome. Real Liquid Glass is native-only (a translucent bar is an approximation), and pages **MUST NOT** imitate status bars, home indicators, or system alerts (BRD-04).
+
+**Sources:** [Designing for iOS](https://developer.apple.com/design/human-interface-guidelines/designing-for-ios) · [Accessibility](https://developer.apple.com/design/human-interface-guidelines/accessibility) · [Color](https://developer.apple.com/design/human-interface-guidelines/color) · [SF Symbols](https://developer.apple.com/design/human-interface-guidelines/sf-symbols) · [WCAG 2.2](https://www.w3.org/TR/WCAG22/) · [WAI-ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/) · [React Native › PlatformColor](https://reactnative.dev/docs/platformcolor)
+
 ---
 
 ## 18. Brand and legal boundaries
@@ -966,6 +979,7 @@ This package teaches an agent to design *for* the Apple ecosystem — never to i
 - **MUST NOT** use Apple trademarks in an app name or images; follow Apple’s trademark guidelines.
 - **MUST NOT** reproduce Apple hardware in icons, symbols, or artwork (use Apple Design Resources or SF Symbols product glyphs where permitted).
 - **MUST NOT** use SF Symbols (or look-alikes) in app icons, logos, or trademarked use; **MUST NOT** customize Apple product/feature symbols.
+- **MUST NOT** ship SF Symbols in websites, web apps, or builds for non-Apple platforms: they are licensed “solely for the purpose of developing Applications for Apple-branded products that run on the system for which the image was provided” ([Xcode and Apple SDKs Agreement](https://www.apple.com/legal/sla/docs/xcode.pdf) §2.10). Use an open-licensed icon set there; a React Native app running on iOS may draw SF Symbols through the system.
 - **MUST NOT** embed Apple system fonts in an app; access them through system APIs. Review Apple’s font license terms before using downloaded SF/NY fonts outside Apple platforms.
 - **MUST NOT** build custom window chrome that imitates system windows.
 - **MUST NOT** create pre-permission or tracking screens that mimic system alerts.
@@ -1030,6 +1044,7 @@ Pages read in full for this document: Design principles · Layout · Materials �
 | Date | Change |
 |---|---|
 | 2026-09-27 | Initial version, researched against the live HIG (latest page update: September 17, 2026) and Apple Developer Documentation. |
+| 2026-09-27 | Added web (React, Next.js, HTML + CSS, Tailwind CSS, Vue, Svelte) and React Native implementation guidance (§17) and the SF Symbols boundary for web and non-Apple builds (§18). |
 
 ---
 

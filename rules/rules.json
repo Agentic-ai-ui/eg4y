@@ -37,18 +37,19 @@
     "PLT-TV": "Platform: tvOS",
     "PLT-VIS": "Platform: visionOS",
     "PLT-WATCH": "Platform: watchOS",
-    "BRD": "Brand and legal"
+    "BRD": "Brand and legal",
+    "STK": "Implementation stacks"
   },
   "counts": {
-    "total": 239,
+    "total": 245,
     "by_severity": {
-      "error": 77,
-      "warning": 160,
+      "error": 78,
+      "warning": 165,
       "info": 2
     },
     "by_check": {
-      "hook": 21,
-      "review": 218
+      "hook": 22,
+      "review": 223
     }
   },
   "rules": [
@@ -7829,6 +7830,232 @@
         }
       ],
       "file": "rules/15-brand-legal.md"
+    },
+    {
+      "id": "STK-01",
+      "prefix": "STK",
+      "number": 1,
+      "category": "Implementation stacks",
+      "title": "Apply the same rules on every stack",
+      "level": "SHOULD",
+      "severity": "warning",
+      "platforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "check": "review",
+      "rule": "SHOULD apply every rule in this set whatever the implementation — SwiftUI, UIKit, AppKit, a web framework, or React Native — translating it through the stack’s own mechanism instead of dropping rules the stack makes harder.",
+      "why": "People judge the interface, not the framework; an app is only consistent across Apple devices if every build follows the same rules (SYNC-01).",
+      "do": "Map system colors to `tokens.css` variables or `PlatformColor`, text styles to `rem` styles or Dynamic Type ramps, and Reduce Motion to `prefers-reduced-motion` or `AccessibilityInfo`.",
+      "dont": "Skip safe areas, Dynamic Type, or labels because “it’s just a web app.”",
+      "sources": [
+        {
+          "title": "HIG › Designing for iOS",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-ios"
+        },
+        {
+          "title": "HIG › Accessibility",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility"
+        },
+        {
+          "title": "GUIDELINES §17",
+          "url": "GUIDELINES.md#other-implementation-surfaces-web-and-react-native"
+        }
+      ],
+      "file": "rules/16-implementation-stacks.md"
+    },
+    {
+      "id": "STK-02",
+      "prefix": "STK",
+      "number": 2,
+      "category": "Implementation stacks",
+      "title": "Keep SF Symbols inside apps for Apple platforms",
+      "level": "MUST NOT",
+      "severity": "error",
+      "platforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "check": "review",
+      "rule": "MUST NOT ship SF Symbols — as exported SVGs, fonts, or images — in websites, web apps, or builds for non-Apple platforms; use an open-licensed icon set there. Apps running on Apple platforms, including React Native apps on iOS, may draw SF Symbols through the system.",
+      "why": "Apple licenses these system-provided images solely for developing apps for Apple-branded products that run on the system they were provided for (Xcode and Apple SDKs Agreement §2.10).",
+      "do": "Lucide (ISC), Phosphor (MIT), Heroicons (MIT), or Material Symbols (Apache 2.0) on the web; `SymbolView` with SF Symbols on iOS and Material Symbols elsewhere in React Native.",
+      "dont": null,
+      "sources": [
+        {
+          "title": "HIG › SF Symbols",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/sf-symbols"
+        },
+        {
+          "title": "Xcode and Apple SDKs Agreement",
+          "url": "https://www.apple.com/legal/sla/docs/xcode.pdf"
+        },
+        {
+          "title": "GUIDELINES §18",
+          "url": "GUIDELINES.md#18-brand-and-legal-boundaries"
+        }
+      ],
+      "file": "rules/16-implementation-stacks.md"
+    },
+    {
+      "id": "STK-03",
+      "prefix": "STK",
+      "number": 3,
+      "category": "Implementation stacks",
+      "title": "Build web controls from native elements",
+      "level": "SHOULD",
+      "severity": "warning",
+      "platforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "check": "hook",
+      "rule": "SHOULD build web controls from native elements — `<button>`, `<a href>`, `<dialog>`, `<input>`, `<select>`, `popover` — and SHOULD NOT attach click handlers to `<div>` or `<span>` elements, which have no role, focus, or keyboard support.",
+      "why": "Native elements are the web’s system components: they bring the role VoiceOver announces, keyboard focus, and activation behavior for free (SYS-01, A11Y-03, A11Y-07).",
+      "do": "`<button type=\"button\" onClick={add}>Add Book</button>`",
+      "dont": "`<div onClick={add}>Add Book</div>`",
+      "sources": [
+        {
+          "title": "HIG › Accessibility",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility"
+        },
+        {
+          "title": "HIG › Buttons",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/buttons"
+        },
+        {
+          "title": "WAI-ARIA Authoring Practices",
+          "url": "https://www.w3.org/WAI/ARIA/apg/"
+        },
+        {
+          "title": "GUIDELINES §17",
+          "url": "GUIDELINES.md#other-implementation-surfaces-web-and-react-native"
+        }
+      ],
+      "file": "rules/16-implementation-stacks.md"
+    },
+    {
+      "id": "STK-04",
+      "prefix": "STK",
+      "number": 4,
+      "category": "Implementation stacks",
+      "title": "Meet WCAG 2.2 AA contrast on the web",
+      "level": "SHOULD",
+      "severity": "warning",
+      "platforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "check": "review",
+      "rule": "SHOULD meet WCAG 2.2 AA contrast in web builds in addition to COL-06 — 4.5:1 for text below 24 px, or below 18.66 px when bold — using the increased-contrast variants of system colors for colored text where the default variants fall short.",
+      "why": "WCAG is the accessibility baseline for the web and is stricter than the HIG for small bold text; blue on white is 3.52:1, while the increased-contrast blue is 4.57:1.",
+      "do": "`color: var(--adl-accent-text)`; colored text on the page background or a list row.",
+      "dont": "Blue or red text on a gray fill in light mode.",
+      "sources": [
+        {
+          "title": "HIG › Color",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/color"
+        },
+        {
+          "title": "HIG › Accessibility",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility"
+        },
+        {
+          "title": "WCAG 2.2",
+          "url": "https://www.w3.org/TR/WCAG22/"
+        },
+        {
+          "title": "GUIDELINES §17",
+          "url": "GUIDELINES.md#other-implementation-surfaces-web-and-react-native"
+        }
+      ],
+      "file": "rules/16-implementation-stacks.md"
+    },
+    {
+      "id": "STK-05",
+      "prefix": "STK",
+      "number": 5,
+      "category": "Implementation stacks",
+      "title": "Generate every stack’s tokens from one source",
+      "level": "SHOULD",
+      "severity": "warning",
+      "platforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "check": "review",
+      "rule": "SHOULD generate colors, text styles, and sizes for every stack in a product from one token source instead of maintaining parallel values per platform or framework.",
+      "why": "Hand-copied values drift, and drift breaks the cross-platform consistency people rely on (SYNC-03).",
+      "do": "Edit `tokens.json`, run `build_tokens.py`, and ship the generated `tokens.css`, `tokens.ts`, `tailwind.css`, and `tokens.native.ts`.",
+      "dont": null,
+      "sources": [
+        {
+          "title": "HIG › Color",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/color"
+        },
+        {
+          "title": "HIG › Typography",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/typography"
+        },
+        {
+          "title": "GUIDELINES §17",
+          "url": "GUIDELINES.md#other-implementation-surfaces-web-and-react-native"
+        }
+      ],
+      "file": "rules/16-implementation-stacks.md"
+    },
+    {
+      "id": "STK-06",
+      "prefix": "STK",
+      "number": 6,
+      "category": "Implementation stacks",
+      "title": "Use native views in React Native",
+      "level": "SHOULD",
+      "severity": "warning",
+      "platforms": [
+        "iOS",
+        "iPadOS"
+      ],
+      "check": "review",
+      "rule": "SHOULD use native views in React Native — the system tab bar and navigation stack, `Switch`, `Alert` and `ActionSheetIOS`, `PlatformColor`, and Dynamic Type ramps — instead of JavaScript re-creations of system components.",
+      "why": "Native views bring Liquid Glass, Dynamic Type, VoiceOver, and future system changes for free; look-alikes must re-create and maintain all of it (SYS-01).",
+      "do": "Expo Router native tabs; a native stack with `headerLargeTitleEnabled`.",
+      "dont": "A custom JavaScript tab bar styled to look like iOS.",
+      "sources": [
+        {
+          "title": "HIG › Tab bars",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/tab-bars"
+        },
+        {
+          "title": "HIG › Designing for iOS",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-ios"
+        },
+        {
+          "title": "GUIDELINES §17",
+          "url": "GUIDELINES.md#other-implementation-surfaces-web-and-react-native"
+        }
+      ],
+      "file": "rules/16-implementation-stacks.md"
     }
   ]
 }

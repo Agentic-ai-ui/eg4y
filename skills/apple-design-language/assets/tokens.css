@@ -39,8 +39,18 @@
   --adl-destructive: var(--adl-red);
   --adl-background: Canvas;
   --adl-label: CanvasText;
-  --adl-background-grouped: var(--adl-system-gray6);
+  --adl-background-grouped: var(--adl-system-gray6);      /* inset-grouped page */
+  --adl-background-grouped-row: var(--adl-background);    /* rows on a grouped page */
   --adl-separator: var(--adl-system-gray4);
+  /* Project values mixed from the tokens above (NOT Apple values): */
+  --adl-secondary-label: color-mix(in srgb, CanvasText 62%, Canvas); /* ≥ 4.5:1 on background and grouped rows */
+  --adl-fill: color-mix(in srgb, var(--adl-system-gray) 18%, transparent); /* control and field fills */
+  --adl-on-accent: white;  /* label on --adl-accent-fill */
+  /* Text and fill variants chosen so web text meets WCAG 2.2 AA (4.5:1), which is stricter than the
+     HIG's 3:1 for bold text. They use HIG increased-contrast variants where the default fails. */
+  --adl-accent-text: #1E6EF4;      /* 4.57:1 on white */
+  --adl-destructive-text: #E9152D; /* 4.56:1 on white */
+  --adl-accent-fill: #1E6EF4;      /* white label: 4.57:1 in every appearance */
 
   /* Typography — system font stacks (never bundle Apple system fonts; TYP-04) */
   --adl-font-text: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -127,6 +137,10 @@
     --adl-system-gray4: #3A3A3C;
     --adl-system-gray5: #2C2C2E;
     --adl-system-gray6: #1C1C1E;
+    --adl-background-grouped: var(--adl-background);
+    --adl-background-grouped-row: var(--adl-system-gray6);
+    --adl-accent-text: #0091FF;
+    --adl-destructive-text: #FF4245;
     --adl-glass-fill: rgb(30 30 30 / 0.6);
     --adl-glass-stroke: rgb(255 255 255 / 0.12);
   }
@@ -153,6 +167,8 @@
     --adl-system-gray4: #BCBCC0;
     --adl-system-gray5: #D8D8DC;
     --adl-system-gray6: #EBEBF0;
+    --adl-secondary-label: color-mix(in srgb, CanvasText 80%, Canvas);
+    --adl-separator: var(--adl-system-gray);
   }
 }
 @media (prefers-contrast: more) and (prefers-color-scheme: dark) {
@@ -175,6 +191,8 @@
     --adl-system-gray4: #444446;
     --adl-system-gray5: #363638;
     --adl-system-gray6: #242426;
+    --adl-accent-text: #5CB8FF;
+    --adl-destructive-text: #FF6165;
   }
 }
 
@@ -237,6 +255,14 @@ body {
   min-height: var(--adl-control-size);
 }
 /* The 44 pt touch default applies everywhere: hybrid devices (iPad + trackpad) report fine pointers too. */
+
+/* Hidden visually, still read by VoiceOver (labels for icon-only controls, A11Y-03) */
+.adl-visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
 
 /* Visible keyboard focus (A11Y-07) */
 :focus-visible { outline: 3px solid var(--adl-accent); outline-offset: 2px; }

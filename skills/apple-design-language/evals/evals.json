@@ -41,6 +41,45 @@
         {"text": "Ensures 44px minimum interactive targets", "rules": ["A11Y-01"]},
         {"text": "Notes that prefers-reduced-transparency isn't available in Safari and provides another fallback", "rules": ["GLS-06"]}
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "Build the main layout for our React + TypeScript reading app (Vite). Sections: Home, Library, Search, Settings. It should feel like an Apple app on iPhone and iPad, with an Add button and a settings sheet.",
+      "expected_output": "One navigation list rendered as a tab bar in compact widths and a sidebar in regular widths via container or media queries (no user-agent checks), links with aria-current, a toolbar with a labeled icon button, a <dialog>-based sheet with Cancel leading and a confirm action trailing, tokens.css/components.css colors and rem text styles, open-licensed icons (no SF Symbols), and Reduce Motion handling.",
+      "files": [],
+      "assertions": [
+        {"text": "Tab bar and sidebar come from the same navigation data, switched by available width — no device or user-agent detection", "rules": ["NAV-06", "LAY-01", "SYNC-01"]},
+        {"text": "Tabs are links that navigate; the current one has aria-current=\"page\"; no action tab", "rules": ["NAV-01"]},
+        {"text": "Icon-only buttons have aria-label; icons are an open-licensed set, not SF Symbols", "rules": ["A11Y-03", "BRD-03"]},
+        {"text": "The sheet uses <dialog> with showModal (or an equivalent accessible modal) and has Cancel and a confirming action", "rules": ["CMP-08", "CMP-09"]},
+        {"text": "Colors and text sizes come from tokens (CSS variables / rem), not hex literals or px below 11", "rules": ["COL-01", "TYP-01", "TYP-02"]}
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "review this tailwind component for apple design problems:\n\nexport function Toolbar({ onAdd }) {\n  return (\n    <div className=\"flex h-10 items-center bg-[#007AFF] px-2\">\n      <div onClick={onAdd} className=\"h-8 w-8 text-white\"><PlusIcon /></div>\n      <span className=\"text-[10px] font-light text-white\">Library</span>\n      <button className=\"dark:bg-black\" onClick={() => localStorage.theme = 'dark'}>Dark</button>\n    </div>\n  );\n}",
+      "expected_output": "A review report, errors first: div used as a button without role/keyboard (A11Y-03, A11Y-07), no accessible name on the icon control (A11Y-03), 32 px target (A11Y-01), 10 px light text (TYP-02, TYP-03), hard-coded brand color on the bar (COL-01, GLS-04), an in-app appearance switch (COL-07), with Tailwind fixes using the generated theme (min-h-control, text-caption2, bg-background, text-accent-text).",
+      "files": [],
+      "assertions": [
+        {"text": "Flags the clickable div: use a <button type=\"button\"> with an aria-label", "rules": ["A11Y-03", "A11Y-07"]},
+        {"text": "Flags the 32 px target and recommends min-h-control / min-w-control (44 px)", "rules": ["A11Y-01"]},
+        {"text": "Flags text-[10px] and font-light", "rules": ["TYP-02", "TYP-03"]},
+        {"text": "Flags bg-[#007AFF] as a hard-coded color on a bar", "rules": ["COL-01", "GLS-04"]},
+        {"text": "Flags the manual dark-mode toggle", "rules": ["COL-07"]}
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "We have an Expo (React Native) app. Make the settings screen feel native on iPhone: grouped rows, an iCloud Sync switch, a Delete All Data action, and bottom tabs for Home, Library, Settings.",
+      "expected_output": "Expo Router native tabs with SF Symbols (sf) and Material fallbacks, a native stack with a large title, rows using PlatformColor system colors and dynamicTypeRamp text, a native Switch with an accessibility label, Delete All as a red row that opens Alert.alert with Cancel and a destructive Delete, 44 pt targets, and no hard-coded hex colors or disabled font scaling.",
+      "files": [],
+      "assertions": [
+        {"text": "Uses native tabs (expo-router native tabs) rather than a JavaScript look-alike tab bar", "rules": ["SYS-01", "NAV-06"]},
+        {"text": "Colors use PlatformColor / system colors (e.g., via tokens.native.ts), not hex literals", "rules": ["COL-01", "COL-02"]},
+        {"text": "Text keeps font scaling and uses Dynamic Type ramps", "rules": ["TYP-01", "A11Y-05"]},
+        {"text": "Delete All confirms with a native alert: specific title, Cancel, and a destructive Delete", "rules": ["CMP-12", "CMP-13", "CMP-14"]},
+        {"text": "Rows and controls are at least 44 pt with accessibility labels", "rules": ["A11Y-01", "A11Y-03"]}
+      ]
     }
   ]
 }
